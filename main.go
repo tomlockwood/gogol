@@ -116,23 +116,44 @@ func (g* game) init_alives() {
 	}
 }
 
+func (g* game) tick() {
+	var cell_rule rule
+	old_alive_count := grid{g.x,g.y,nil}
+	old_alive_count.init()
+	copy(old_alive_count.array,g.alive_count.array)
+	new_grid := grid{g.x,g.y,nil}
+	new_grid.init()
+	for y := 0; y < g.y; y++ {
+		for x := 0; x < g.x; x++ {
+			cell_rule = g.rules.array[g.grid.array[y][x]]
+			new_grid.array[y][x] = cell_rule.transitions[old_alive_count.array[y][x]]
+			if (cell_rule.alive != g.alives.array[y][x]) {
+				g.update_alive_state(x,y,cell_rule.alive)
+			}
+		}
+	}
+	g.grid = new_grid
+}
+
+func (g* game) run(count int) {
+	for i := 0; i <= count; i++ {
+		g.tick()
+	}
+}
+
 func main() {
-	x := 5
-	y := 5
+	x := 50
+	y := 50
 	gr := grid{x,y,nil}
 	gr.init()
-	gr.randomize(2)
+	gr.randomize(10)
 	rs := rules{}
-	rs.randomize(2)
+	rs.randomize(10)
 	a := alives{x,y,nil}
 	a.init()
 	ac := grid{x,y,nil}
 	ac.init()
 	g := game{x,y,gr,rs,a,ac}
 	g.init_alives()
-	fmt.Println(g)
-	fmt.Println("GRID")
-	g.grid.print()
-	fmt.Println("ALIVE COUNT")
-	g.alive_count.print()
+	g.run(10000)
 }
