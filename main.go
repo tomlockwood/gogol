@@ -15,14 +15,12 @@ type grid struct {
 	array [][]uint8
 }
 
-func (gr* grid) init() {
-	if (len(gr.array) > 0) {
-		panic("Array contains data")
+func make_grid(x int, y int) grid {
+	array := make([][]uint8, y)
+	for idx := range array {
+		array[idx] = make([]uint8, x)
 	}
-	gr.array = make([][]uint8, gr.y)
-	for idx := range gr.array {
-		gr.array[idx] = make([]uint8, gr.x)
-	}
+	return grid{x,y,array}
 }
 
 func (gr* grid) randomize(rule_amount int) {
@@ -119,15 +117,13 @@ func (g* game) init() {
 func (g* game) tick() {
 	var cell_rule rule
 	var cell_alive bool
-	old_alive_count := grid{g.x,g.y,nil}
-	old_alive_count.init()
+	old_alive_count := make_grid(g.x,g.y)
 	for y := range g.alive_count.array {
 		for x := range g.alive_count.array[y] {
 			old_alive_count.array[y][x] = g.alive_count.array[y][x]
 		}
 	}
-	new_grid := grid{g.x,g.y,nil}
-	new_grid.init()
+	new_grid := make_grid(g.x,g.y)
 	for y := 0; y < g.y; y++ {
 		for x := 0; x < g.x; x++ {
 			cell_rule = g.rules.array[g.grid.array[y][x]]
@@ -156,17 +152,15 @@ func (g* game) run(count int, interactive bool) {
 func main() {
 	x := 10
 	y := 10
-	gr := grid{x,y,nil}
-	gr.init()
+	gr := make_grid(x,y)
 	gr.randomize(2)
 	r0 := rule{false,[9]uint8{0,0,0,1,0,0,0,0,0}}
 	r1 := rule{true,[9]uint8{0,0,1,1,0,0,0,0,0}}
 	rs := rules{[]rule{r0,r1}}
 	a := alives{x,y,nil}
 	a.init()
-	ac := grid{x,y,nil}
-	ac.init()
+	ac := make_grid(x,y)
 	g := game{x,y,gr,rs,a,ac}
 	g.init()
-	g.run(10000,false)
+	g.run(10000,true)
 }
