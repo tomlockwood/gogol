@@ -104,7 +104,7 @@ func (g* game) update_alive_state(x int, y int, alive_state bool) {
 	g.alives.array[y][x] = alive_state
 }
 
-func (g* game) init_alives() {
+func (g* game) init() {
 	var cell_alive bool
 	for y := 0; y < g.y; y++ {
 		for x := 0; x < g.x; x++ {
@@ -118,42 +118,55 @@ func (g* game) init_alives() {
 
 func (g* game) tick() {
 	var cell_rule rule
+	var cell_alive bool
 	old_alive_count := grid{g.x,g.y,nil}
 	old_alive_count.init()
-	copy(old_alive_count.array,g.alive_count.array)
+	for y := range g.alive_count.array {
+		for x := range g.alive_count.array[y] {
+			old_alive_count.array[y][x] = g.alive_count.array[y][x]
+		}
+	}
 	new_grid := grid{g.x,g.y,nil}
 	new_grid.init()
 	for y := 0; y < g.y; y++ {
 		for x := 0; x < g.x; x++ {
 			cell_rule = g.rules.array[g.grid.array[y][x]]
 			new_grid.array[y][x] = cell_rule.transitions[old_alive_count.array[y][x]]
-			if (cell_rule.alive != g.alives.array[y][x]) {
-				g.update_alive_state(x,y,cell_rule.alive)
+			cell_alive = cell_rule.alive
+			if (cell_alive != g.alives.array[y][x]) {
+				g.update_alive_state(x,y,cell_alive)
 			}
 		}
 	}
-	g.grid = new_grid
+	copy(g.grid.array,new_grid.array)
 }
 
-func (g* game) run(count int) {
+func (g* game) run(count int, interactive bool) {
+	var response int
 	for i := 0; i <= count; i++ {
+		if (interactive) {
+			fmt.Scanf("%c", &response)
+		}
+		g.grid.print()
+		fmt.Println()
 		g.tick()
 	}
 }
 
 func main() {
-	x := 50
-	y := 50
+	x := 10
+	y := 10
 	gr := grid{x,y,nil}
 	gr.init()
-	gr.randomize(10)
-	rs := rules{}
-	rs.randomize(10)
+	gr.randomize(2)
+	r0 := rule{false,[9]uint8{0,0,0,1,0,0,0,0,0}}
+	r1 := rule{true,[9]uint8{0,0,1,1,0,0,0,0,0}}
+	rs := rules{[]rule{r0,r1}}
 	a := alives{x,y,nil}
 	a.init()
 	ac := grid{x,y,nil}
 	ac.init()
 	g := game{x,y,gr,rs,a,ac}
-	g.init_alives()
-	g.run(10000)
+	g.init()
+	g.run(10000,false)
 }
