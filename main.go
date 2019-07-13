@@ -65,14 +65,12 @@ type alives struct {
 	array [][]bool
 }
 
-func (a* alives) init() {
-	if (len(a.array) > 0) {
-		panic("Array contains data")
+func make_alives(x int, y int) alives {
+	array := make([][]bool, y)
+	for idx := range array {
+		array[idx] = make([]bool, x)
 	}
-	a.array = make([][]bool, a.y)
-	for idx := range a.array {
-		a.array[idx] = make([]bool, a.x)
-	}
+	return alives{x,y,array}
 }
 
 type game struct {
@@ -157,8 +155,7 @@ func main() {
 	r0 := rule{false,[9]uint8{0,0,0,1,0,0,0,0,0}}
 	r1 := rule{true,[9]uint8{0,0,1,1,0,0,0,0,0}}
 	rs := rules{[]rule{r0,r1}}
-	a := alives{x,y,nil}
-	a.init()
+	a := make_alives(x,y)
 	ac := make_grid(x,y)
 	g := game{x,y,gr,rs,a,ac}
 	g.init()
