@@ -203,6 +203,19 @@ type GameOpts struct {
 // MakeGame is for fun
 func MakeGame(options GameOpts) Game {
 
+	// Get/set rules amount if needed
+	if options.Rules.array == nil {
+		if options.RuleNumber == 0 {
+			options.RuleNumber = r.Intn(4) + 2
+		}
+		options.Rules.randomize(options.RuleNumber)
+	} else if options.RuleNumber == 0 {
+		options.RuleNumber = len(options.Rules.array)
+	} else if options.RuleNumber != len(options.Rules.array) {
+		panic(fmt.Sprintf("Rule number in options %d does not equal rules in array %d", options.RuleNumber, len(options.Rules.array)))
+	}
+
+	// Grid check
 	if options.X < 0 || options.Y < 0 {
 		panic("X/Y values cannot be negative")
 	}
@@ -245,6 +258,7 @@ func MakeGame(options GameOpts) Game {
 	// or validate the grid
 	if options.Grid.array == nil {
 		gameGrid = makeGrid(options.X, options.Y)
+		gameGrid.randomize(options.RuleNumber)
 	} else {
 		options.Grid.x = options.X
 		options.Grid.y = options.Y
@@ -257,18 +271,6 @@ func MakeGame(options GameOpts) Game {
 	// Make alive bool and counts arrays
 	alives := makeAlives(options.X, options.Y)
 	aliveCounts := makeGrid(options.X, options.Y)
-
-	// Get/set rules amount if needed
-	if options.Rules.array == nil {
-		if options.RuleNumber == 0 {
-			options.RuleNumber = r.Intn(4) + 2
-		}
-		options.Rules.randomize(options.RuleNumber)
-	} else if options.RuleNumber == 0 {
-		options.RuleNumber = len(options.Rules.array)
-	} else if options.RuleNumber != len(options.Rules.array) {
-		panic(fmt.Sprintf("Rule number in options %d does not equal rules in array %d", options.RuleNumber, len(options.Rules.array)))
-	}
 
 	currentGame := Game{
 		options.X,
