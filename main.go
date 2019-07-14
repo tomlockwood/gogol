@@ -113,7 +113,8 @@ func (g* game) init() {
 }
 
 func (g* game) tick() {
-	var cell_rule rule
+	var old_cell_rule, new_cell_rule rule
+	var next_rule_idx uint8
 	var cell_alive bool
 	old_alive_count := make_grid(g.x,g.y)
 	for y := range g.alive_count.array {
@@ -124,9 +125,11 @@ func (g* game) tick() {
 	new_grid := make_grid(g.x,g.y)
 	for y := 0; y < g.y; y++ {
 		for x := 0; x < g.x; x++ {
-			cell_rule = g.rules.array[g.grid.array[y][x]]
-			new_grid.array[y][x] = cell_rule.transitions[old_alive_count.array[y][x]]
-			cell_alive = cell_rule.alive
+			old_cell_rule = g.rules.array[g.grid.array[y][x]]
+			next_rule_idx = old_cell_rule.transitions[old_alive_count.array[y][x]]
+			new_grid.array[y][x] = next_rule_idx
+			new_cell_rule = g.rules.array[next_rule_idx]
+			cell_alive = new_cell_rule.alive
 			if (cell_alive != g.alives.array[y][x]) {
 				g.update_alive_state(x,y,cell_alive)
 			}
