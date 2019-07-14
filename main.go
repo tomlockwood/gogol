@@ -1,4 +1,4 @@
-package main
+package gol
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ type grid struct {
 	array [][]uint8
 }
 
-func make_grid(x int, y int) grid {
+func makeGrid(x int, y int) grid {
 	array := make([][]uint8, y)
 	for idx := range array {
 		array[idx] = make([]uint8, x)
@@ -23,10 +23,10 @@ func make_grid(x int, y int) grid {
 	return grid{x, y, array}
 }
 
-func (gr *grid) randomize(rule_amount int) {
+func (gr *grid) randomize(ruleAmount int) {
 	for idxy := range gr.array {
 		for idxx := range gr.array[idxy] {
-			gr.array[idxy][idxx] = uint8(r.Intn(rule_amount))
+			gr.array[idxy][idxx] = uint8(r.Intn(ruleAmount))
 		}
 	}
 }
@@ -42,10 +42,10 @@ type rule struct {
 	transitions [9]uint8
 }
 
-func (ru *rule) randomize(rule_amount int) {
+func (ru *rule) randomize(ruleAmount int) {
 	ru.alive = r.Intn(2) == 0
 	for idx := range ru.transitions {
-		ru.transitions[idx] = uint8(r.Intn(rule_amount))
+		ru.transitions[idx] = uint8(r.Intn(ruleAmount))
 	}
 }
 
@@ -53,10 +53,10 @@ type rules struct {
 	array []rule
 }
 
-func (rs *rules) randomize(rule_amount int) {
-	rs.array = make([]rule, rule_amount)
+func (rs *rules) randomize(ruleAmount int) {
+	rs.array = make([]rule, ruleAmount)
 	for idx := range rs.array {
-		rs.array[idx].randomize(rule_amount)
+		rs.array[idx].randomize(ruleAmount)
 	}
 }
 
@@ -65,7 +65,7 @@ type alives struct {
 	array [][]bool
 }
 
-func make_alives(x int, y int) alives {
+func makeAlives(x int, y int) alives {
 	array := make([][]bool, y)
 	for idx := range array {
 		array[idx] = make([]bool, x)
@@ -74,68 +74,68 @@ func make_alives(x int, y int) alives {
 }
 
 type game struct {
-	x, y        int
-	grid        grid
-	rules       rules
-	alives      alives
-	alive_count grid
+	x, y       int
+	grid       grid
+	rules      rules
+	alives     alives
+	aliveCount grid
 }
 
-func (g *game) update_alive_state(x int, y int, alive_state bool) {
-	var absolute_y, absolute_x int
-	for rel_y := -1; rel_y <= 1; rel_y++ {
-		for rel_x := -1; rel_x <= 1; rel_x++ {
-			absolute_y = rel_y + y
-			absolute_x = rel_x + x
-			if (rel_y == 0 && rel_x == 0) || absolute_y < 0 || absolute_x < 0 || absolute_y >= g.y || absolute_x >= g.x {
+func (g *game) updateAliveState(x int, y int, aliveState bool) {
+	var absoluteY, absoluteX int
+	for relY := -1; relY <= 1; relY++ {
+		for relX := -1; relX <= 1; relX++ {
+			absoluteY = relY + y
+			absoluteX = relX + x
+			if (relY == 0 && relX == 0) || absoluteY < 0 || absoluteX < 0 || absoluteY >= g.y || absoluteX >= g.x {
 				continue
 			}
-			if alive_state {
-				g.alive_count.array[absolute_y][absolute_x]++
+			if aliveState {
+				g.aliveCount.array[absoluteY][absoluteX]++
 			} else {
-				g.alive_count.array[absolute_y][absolute_x]--
+				g.aliveCount.array[absoluteY][absoluteX]--
 			}
 		}
 	}
-	g.alives.array[y][x] = alive_state
+	g.alives.array[y][x] = aliveState
 }
 
 func (g *game) init() {
-	var cell_alive bool
+	var cellAlive bool
 	for y := 0; y < g.y; y++ {
 		for x := 0; x < g.x; x++ {
-			cell_alive = g.rules.array[g.grid.array[y][x]].alive
-			if cell_alive {
-				g.update_alive_state(x, y, cell_alive)
+			cellAlive = g.rules.array[g.grid.array[y][x]].alive
+			if cellAlive {
+				g.updateAliveState(x, y, cellAlive)
 			}
 		}
 	}
 }
 
 func (g *game) tick() {
-	var old_cell_rule, new_cell_rule rule
-	var next_rule_idx uint8
-	var cell_alive bool
-	old_alive_count := make_grid(g.x, g.y)
-	for y := range g.alive_count.array {
-		for x := range g.alive_count.array[y] {
-			old_alive_count.array[y][x] = g.alive_count.array[y][x]
+	var oldCellRule, newCellRule rule
+	var nextRuleIdx uint8
+	var cellAlive bool
+	oldAliveCount := makeGrid(g.x, g.y)
+	for y := range g.aliveCount.array {
+		for x := range g.aliveCount.array[y] {
+			oldAliveCount.array[y][x] = g.aliveCount.array[y][x]
 		}
 	}
-	new_grid := make_grid(g.x, g.y)
+	newGrid := makeGrid(g.x, g.y)
 	for y := 0; y < g.y; y++ {
 		for x := 0; x < g.x; x++ {
-			old_cell_rule = g.rules.array[g.grid.array[y][x]]
-			next_rule_idx = old_cell_rule.transitions[old_alive_count.array[y][x]]
-			new_grid.array[y][x] = next_rule_idx
-			new_cell_rule = g.rules.array[next_rule_idx]
-			cell_alive = new_cell_rule.alive
-			if cell_alive != g.alives.array[y][x] {
-				g.update_alive_state(x, y, cell_alive)
+			oldCellRule = g.rules.array[g.grid.array[y][x]]
+			nextRuleIdx = oldCellRule.transitions[oldAliveCount.array[y][x]]
+			newGrid.array[y][x] = nextRuleIdx
+			newCellRule = g.rules.array[nextRuleIdx]
+			cellAlive = newCellRule.alive
+			if cellAlive != g.alives.array[y][x] {
+				g.updateAliveState(x, y, cellAlive)
 			}
 		}
 	}
-	copy(g.grid.array, new_grid.array)
+	copy(g.grid.array, newGrid.array)
 }
 
 func (g *game) run(count int, interactive bool) {
@@ -153,13 +153,13 @@ func (g *game) run(count int, interactive bool) {
 func main() {
 	x := 10
 	y := 10
-	gr := make_grid(x, y)
+	gr := makeGrid(x, y)
 	gr.randomize(2)
 	r0 := rule{false, [9]uint8{0, 0, 0, 1, 0, 0, 0, 0, 0}}
 	r1 := rule{true, [9]uint8{0, 0, 1, 1, 0, 0, 0, 0, 0}}
 	rs := rules{[]rule{r0, r1}}
-	a := make_alives(x, y)
-	ac := make_grid(x, y)
+	a := makeAlives(x, y)
+	ac := makeGrid(x, y)
 	g := game{x, y, gr, rs, a, ac}
 	g.init()
 	g.run(10000, false)
