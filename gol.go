@@ -1,7 +1,9 @@
 package gol
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"sync"
 	"time"
@@ -297,4 +299,19 @@ func MakeGame(options GameOpts) Game {
 	currentGame.init()
 
 	return currentGame
+}
+
+type gameSave struct {
+	Rules []Rule    `json:"rules"`
+	Grid  [][]uint8 `json:"grid"`
+}
+
+// Save game of life to file
+func (g *Game) Save(filename string) {
+	saveInfo := gameSave{g.rules.Array, g.grid.Array}
+	json, err := json.Marshal(saveInfo)
+	if err != nil {
+		panic(err)
+	}
+	ioutil.WriteFile(filename, json, 0644)
 }
