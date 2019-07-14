@@ -36,10 +36,10 @@ func makeGrid(x int, y int) Grid {
 	return Grid{x, y, array}
 }
 
-func (gr *Grid) randomize(ruleAmount int) {
+func (gr *Grid) randomize(RuleAmount int) {
 	for idxy := range gr.array {
 		for idxx := range gr.array[idxy] {
-			gr.array[idxy][idxx] = uint8(r.Intn(ruleAmount))
+			gr.array[idxy][idxx] = uint8(r.Intn(RuleAmount))
 		}
 	}
 }
@@ -50,27 +50,28 @@ func (gr *Grid) print() {
 	}
 }
 
-type rule struct {
+// Rule for Game of Life
+type Rule struct {
 	alive       bool
 	transitions [9]uint8
 }
 
-func (ru *rule) randomize(ruleAmount int) {
+func (ru *Rule) randomize(RuleAmount int) {
 	ru.alive = r.Intn(2) == 0
 	for idx := range ru.transitions {
-		ru.transitions[idx] = uint8(r.Intn(ruleAmount))
+		ru.transitions[idx] = uint8(r.Intn(RuleAmount))
 	}
 }
 
 // Rules for game of life
 type Rules struct {
-	array []rule
+	array []Rule
 }
 
-func (rs *Rules) randomize(ruleAmount int) {
-	rs.array = make([]rule, ruleAmount)
+func (rs *Rules) randomize(RuleAmount int) {
+	rs.array = make([]Rule, RuleAmount)
 	for idx := range rs.array {
-		rs.array[idx].randomize(ruleAmount)
+		rs.array[idx].randomize(RuleAmount)
 	}
 }
 
@@ -153,7 +154,7 @@ func (g *Game) init() {
 }
 
 func (g *Game) tick() {
-	var oldCellRule, newCellRule rule
+	var oldCellRule, newCellRule Rule
 	var nextRuleIdx uint8
 	var cellAlive bool
 	oldAliveCount := makeGrid(g.x, g.y)
