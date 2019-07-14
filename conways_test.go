@@ -44,7 +44,7 @@ var r0 = Rule{false, [9]uint8{0, 0, 0, 1, 0, 0, 0, 0, 0}}
 var r1 = Rule{true, [9]uint8{0, 0, 1, 1, 0, 0, 0, 0, 0}}
 var rs = Rules{[]Rule{r0, r1}}
 
-// TestConwayDeath - Checking one tick death
+// TestConwayDeath - Checking one Tick death
 func TestConwayDeath(t *testing.T) {
 	y0 := []uint8{0, 0, 0}
 	y1 := []uint8{0, 1, 0}
@@ -53,14 +53,14 @@ func TestConwayDeath(t *testing.T) {
 	grid := Grid{3, 3, array}
 
 	game := MakeGame(GameOpts{3, 3, grid, 2, rs})
-	game.tick()
+	game.Tick()
 
 	y0Out := []uint8{0, 0, 0}
 	y1Out := []uint8{0, 0, 0}
 	y2Out := []uint8{0, 0, 0}
 	arrayOut := [][]uint8{y0Out, y1Out, y2Out}
 
-	if mismatchCheck(arrayOut, game.grid.array) {
+	if mismatchCheck(arrayOut, game.grid.Array) {
 		t.Fatalf("Slices do not match")
 	}
 }
@@ -74,7 +74,7 @@ func TestConwaySquare(t *testing.T) {
 	grid := Grid{4, 4, array}
 
 	game := MakeGame(GameOpts{4, 4, grid, 2, rs})
-	game.tick()
+	game.Tick()
 
 	y0Out := []uint8{0, 0, 0, 0}
 	y1Out := []uint8{0, 1, 1, 0}
@@ -82,13 +82,13 @@ func TestConwaySquare(t *testing.T) {
 	y3Out := []uint8{0, 0, 0, 0}
 	arrayOut := [][]uint8{y0Out, y1Out, y2Out, y3Out}
 
-	if mismatchCheck(arrayOut, game.grid.array) {
+	if mismatchCheck(arrayOut, game.grid.Array) {
 		t.Fatalf("Slices do not match")
 	}
 }
 
 func TestConwayGlider(t *testing.T) {
-	// Test for 1 tick death
+	// Test for 1 Tick death
 	y0 := []uint8{0, 1, 0, 0, 0, 0, 0, 0, 0, 0}
 	y1 := []uint8{0, 0, 1, 0, 0, 0, 0, 0, 0, 0}
 	y2 := []uint8{1, 1, 1, 0, 0, 0, 0, 0, 0, 0}
@@ -117,7 +117,7 @@ func TestConwayGlider(t *testing.T) {
 	y9Out := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	arrayOut := [][]uint8{y0Out, y1Out, y2Out, y3Out, y4Out, y5Out, y6Out, y7Out, y8Out, y9Out}
 
-	if mismatchCheck(arrayOut, game.grid.array) {
+	if mismatchCheck(arrayOut, game.grid.Array) {
 		t.Fatalf("Slices do not match")
 	}
 }

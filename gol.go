@@ -12,23 +12,25 @@ var r = rand.New(src)
 
 // Grid to play on
 type Grid struct {
-	x, y  int
-	array [][]uint8
+	X, Y  int
+	Array [][]uint8
 }
 
-func (gr *Grid) validate() {
-	if len(gr.array) != gr.y {
-		panic(fmt.Sprintf("Grid array length %d does not equal grid y %d", len(gr.array), gr.y))
+// Validate a Grid
+func (gr *Grid) Validate() {
+	if len(gr.Array) != gr.Y {
+		panic(fmt.Sprintf("Grid array length %d does not equal grid y %d", len(gr.Array), gr.Y))
 	}
 
-	for idx := range gr.array {
-		if len(gr.array[idx]) != gr.x {
-			panic(fmt.Sprintf("Grid array length at line %d, %d does not equal grid x: %d", idx, len(gr.array[idx]), gr.x))
+	for idx := range gr.Array {
+		if len(gr.Array[idx]) != gr.X {
+			panic(fmt.Sprintf("Grid array length at line %d, %d does not equal grid x: %d", idx, len(gr.Array[idx]), gr.X))
 		}
 	}
 }
 
-func makeGrid(x int, y int) Grid {
+// MakeGrid a 2D grid for play
+func MakeGrid(x int, y int) Grid {
 	array := make([][]uint8, y)
 	for idx := range array {
 		array[idx] = make([]uint8, x)
@@ -37,41 +39,41 @@ func makeGrid(x int, y int) Grid {
 }
 
 func (gr *Grid) randomize(RuleAmount int) {
-	for idxy := range gr.array {
-		for idxx := range gr.array[idxy] {
-			gr.array[idxy][idxx] = uint8(r.Intn(RuleAmount))
+	for idxy := range gr.Array {
+		for idxx := range gr.Array[idxy] {
+			gr.Array[idxy][idxx] = uint8(r.Intn(RuleAmount))
 		}
 	}
 }
 
 func (gr *Grid) print() {
-	for idx := range gr.array {
-		fmt.Println(gr.array[idx])
+	for idx := range gr.Array {
+		fmt.Println(gr.Array[idx])
 	}
 }
 
 // Rule for Game of Life
 type Rule struct {
-	alive       bool
-	transitions [9]uint8
+	Alive       bool
+	Transitions [9]uint8
 }
 
 func (ru *Rule) randomize(RuleAmount int) {
-	ru.alive = r.Intn(2) == 0
-	for idx := range ru.transitions {
-		ru.transitions[idx] = uint8(r.Intn(RuleAmount))
+	ru.Alive = r.Intn(2) == 0
+	for idx := range ru.Transitions {
+		ru.Transitions[idx] = uint8(r.Intn(RuleAmount))
 	}
 }
 
 // Rules for game of life
 type Rules struct {
-	array []Rule
+	Array []Rule
 }
 
 func (rs *Rules) randomize(RuleAmount int) {
-	rs.array = make([]Rule, RuleAmount)
-	for idx := range rs.array {
-		rs.array[idx].randomize(RuleAmount)
+	rs.Array = make([]Rule, RuleAmount)
+	for idx := range rs.Array {
+		rs.Array[idx].randomize(RuleAmount)
 	}
 }
 
@@ -97,15 +99,16 @@ type Game struct {
 	aliveCount Grid
 }
 
-func (g *Game) validate() {
+// Validate a game
+func (g *Game) Validate() {
 	// Check grid exists
-	if len(g.grid.array) == 0 {
+	if len(g.grid.Array) == 0 {
 		panic("Grid not loaded")
 	}
 
 	var ruleNumber uint8
 
-	ruleNumber = uint8(len(g.rules.array))
+	ruleNumber = uint8(len(g.rules.Array))
 
 	// Check rules exist
 	if ruleNumber == 0 {
@@ -113,9 +116,9 @@ func (g *Game) validate() {
 	}
 
 	// Check grid has no cells outside rule number
-	for y := range g.grid.array {
-		for x := range g.grid.array[y] {
-			if g.grid.array[y][x] > ruleNumber {
+	for y := range g.grid.Array {
+		for x := range g.grid.Array[y] {
+			if g.grid.Array[y][x] > ruleNumber {
 				panic(fmt.Sprintf("X: %d Y: %d not consistent with rule count", x, y))
 			}
 		}
@@ -132,9 +135,9 @@ func (g *Game) updateAliveState(x int, y int, aliveState bool) {
 				continue
 			}
 			if aliveState {
-				g.aliveCount.array[absoluteY][absoluteX]++
+				g.aliveCount.Array[absoluteY][absoluteX]++
 			} else {
-				g.aliveCount.array[absoluteY][absoluteX]--
+				g.aliveCount.Array[absoluteY][absoluteX]--
 			}
 		}
 	}
@@ -145,7 +148,7 @@ func (g *Game) init() {
 	var cellAlive bool
 	for y := 0; y < g.y; y++ {
 		for x := 0; x < g.x; x++ {
-			cellAlive = g.rules.array[g.grid.array[y][x]].alive
+			cellAlive = g.rules.Array[g.grid.Array[y][x]].Alive
 			if cellAlive {
 				g.updateAliveState(x, y, cellAlive)
 			}
@@ -153,30 +156,31 @@ func (g *Game) init() {
 	}
 }
 
-func (g *Game) tick() {
+// Tick progresses the game one frame
+func (g *Game) Tick() {
 	var oldCellRule, newCellRule Rule
 	var nextRuleIdx uint8
 	var cellAlive bool
-	oldAliveCount := makeGrid(g.x, g.y)
-	for y := range g.aliveCount.array {
-		for x := range g.aliveCount.array[y] {
-			oldAliveCount.array[y][x] = g.aliveCount.array[y][x]
+	oldAliveCount := MakeGrid(g.x, g.y)
+	for y := range g.aliveCount.Array {
+		for x := range g.aliveCount.Array[y] {
+			oldAliveCount.Array[y][x] = g.aliveCount.Array[y][x]
 		}
 	}
-	newGrid := makeGrid(g.x, g.y)
+	newGrid := MakeGrid(g.x, g.y)
 	for y := 0; y < g.y; y++ {
 		for x := 0; x < g.x; x++ {
-			oldCellRule = g.rules.array[g.grid.array[y][x]]
-			nextRuleIdx = oldCellRule.transitions[oldAliveCount.array[y][x]]
-			newGrid.array[y][x] = nextRuleIdx
-			newCellRule = g.rules.array[nextRuleIdx]
-			cellAlive = newCellRule.alive
+			oldCellRule = g.rules.Array[g.grid.Array[y][x]]
+			nextRuleIdx = oldCellRule.Transitions[oldAliveCount.Array[y][x]]
+			newGrid.Array[y][x] = nextRuleIdx
+			newCellRule = g.rules.Array[nextRuleIdx]
+			cellAlive = newCellRule.Alive
 			if cellAlive != g.alives.array[y][x] {
 				g.updateAliveState(x, y, cellAlive)
 			}
 		}
 	}
-	copy(g.grid.array, newGrid.array)
+	copy(g.grid.Array, newGrid.Array)
 }
 
 // Run a game of life
@@ -189,7 +193,7 @@ func (g *Game) Run(count int, interactive bool) {
 			fmt.Scanf("%c", &response)
 			fmt.Println()
 		}
-		g.tick()
+		g.Tick()
 	}
 }
 
@@ -205,15 +209,15 @@ type GameOpts struct {
 func MakeGame(options GameOpts) Game {
 
 	// Get/set rules amount if needed
-	if options.Rules.array == nil {
+	if options.Rules.Array == nil {
 		if options.RuleNumber == 0 {
 			options.RuleNumber = r.Intn(4) + 2
 		}
 		options.Rules.randomize(options.RuleNumber)
 	} else if options.RuleNumber == 0 {
-		options.RuleNumber = len(options.Rules.array)
-	} else if options.RuleNumber != len(options.Rules.array) {
-		panic(fmt.Sprintf("Rule number in options %d does not equal rules in array %d", options.RuleNumber, len(options.Rules.array)))
+		options.RuleNumber = len(options.Rules.Array)
+	} else if options.RuleNumber != len(options.Rules.Array) {
+		panic(fmt.Sprintf("Rule number in options %d does not equal rules in array %d", options.RuleNumber, len(options.Rules.Array)))
 	}
 
 	// Grid check
@@ -229,24 +233,24 @@ func MakeGame(options GameOpts) Game {
 	// or by the x, y set by the grid
 	// or by the game options struct
 	if options.X == 0 {
-		if options.Grid.array == nil {
+		if options.Grid.Array == nil {
 			setX = 50
-		} else if options.Grid.x == 0 {
-			setX = len(options.Grid.array[0])
+		} else if options.Grid.X == 0 {
+			setX = len(options.Grid.Array[0])
 		} else {
-			setX = options.Grid.x
+			setX = options.Grid.X
 		}
 	} else {
 		setX = options.X
 	}
 
 	if options.Y == 0 {
-		if options.Grid.array == nil {
+		if options.Grid.Array == nil {
 			setY = 50
-		} else if options.Grid.y == 0 {
-			setY = len(options.Grid.array)
+		} else if options.Grid.Y == 0 {
+			setY = len(options.Grid.Array)
 		} else {
-			setY = options.Grid.y
+			setY = options.Grid.Y
 		}
 	} else {
 		setY = options.Y
@@ -257,13 +261,13 @@ func MakeGame(options GameOpts) Game {
 
 	// Create the grid if it doesn't exist
 	// or validate the grid
-	if options.Grid.array == nil {
-		gameGrid = makeGrid(options.X, options.Y)
+	if options.Grid.Array == nil {
+		gameGrid = MakeGrid(options.X, options.Y)
 		gameGrid.randomize(options.RuleNumber)
 	} else {
-		options.Grid.x = options.X
-		options.Grid.y = options.Y
-		options.Grid.validate()
+		options.Grid.X = options.X
+		options.Grid.Y = options.Y
+		options.Grid.Validate()
 		gameGrid = options.Grid
 	}
 
@@ -271,7 +275,7 @@ func MakeGame(options GameOpts) Game {
 
 	// Make alive bool and counts arrays
 	alives := makeAlives(options.X, options.Y)
-	aliveCounts := makeGrid(options.X, options.Y)
+	aliveCounts := MakeGrid(options.X, options.Y)
 
 	currentGame := Game{
 		options.X,
@@ -281,7 +285,7 @@ func MakeGame(options GameOpts) Game {
 		alives,
 		aliveCounts}
 
-	currentGame.validate()
+	currentGame.Validate()
 	currentGame.init()
 
 	return currentGame
