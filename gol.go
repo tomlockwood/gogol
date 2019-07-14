@@ -301,6 +301,23 @@ func MakeGame(options GameOpts) Game {
 	return currentGame
 }
 
+// RunMany games of life
+func RunMany(Options GameOpts, gameAmount int, tickAmount int) {
+	var wg sync.WaitGroup
+	wg.Add(gameAmount)
+	for i := 0; i < gameAmount; i++ {
+		go func(i int) {
+			defer wg.Done()
+			g := MakeGame(Options)
+			g.Run(tickAmount, false)
+			// g.Save(fmt.Sprintf("./%s-%d.json", time.Now().Format(time.RFC3339), i))
+			fmt.Println("Game ", i)
+		}(i)
+	}
+
+	wg.Wait()
+}
+
 type gameSave struct {
 	Rules []Rule    `json:"rules"`
 	Grid  [][]uint8 `json:"grid"`
