@@ -60,7 +60,8 @@ func (gr *Grid) Randomize(RuleAmount int) {
 	}
 }
 
-func (gr *Grid) print() {
+// Print grid contents
+func (gr *Grid) Print() {
 	for idx := range gr.Array {
 		fmt.Println(gr.Array[idx])
 	}
@@ -111,8 +112,8 @@ func makeAlives(x int, y int) alives {
 // Game contains all game state required to progress a game of life
 type Game struct {
 	x, y       int
-	grid       Grid
-	rules      Rules
+	Grid       Grid
+	Rules      Rules
 	alives     alives
 	aliveCount Grid
 }
@@ -121,13 +122,13 @@ type Game struct {
 // If this does not pass the game cannot Tick properly
 func (g *Game) Validate() {
 	// Check grid exists
-	if len(g.grid.Array) == 0 {
+	if len(g.Grid.Array) == 0 {
 		panic("Grid not loaded")
 	}
 
 	var ruleNumber uint8
 
-	ruleNumber = uint8(len(g.rules.Array))
+	ruleNumber = uint8(len(g.Rules.Array))
 
 	// Check rules exist
 	if ruleNumber == 0 {
@@ -135,9 +136,9 @@ func (g *Game) Validate() {
 	}
 
 	// Check grid has no cells outside rule number
-	for y := range g.grid.Array {
-		for x := range g.grid.Array[y] {
-			if g.grid.Array[y][x] > ruleNumber {
+	for y := range g.Grid.Array {
+		for x := range g.Grid.Array[y] {
+			if g.Grid.Array[y][x] > ruleNumber {
 				panic(fmt.Sprintf("X: %d Y: %d not consistent with rule count", x, y))
 			}
 		}
@@ -167,7 +168,7 @@ func (g *Game) init() {
 	var cellAlive bool
 	for y := 0; y < g.y; y++ {
 		for x := 0; x < g.x; x++ {
-			cellAlive = g.rules.Array[g.grid.Array[y][x]].Alive
+			cellAlive = g.Rules.Array[g.Grid.Array[y][x]].Alive
 			if cellAlive {
 				g.updateAliveState(x, y, cellAlive)
 			}
@@ -189,17 +190,17 @@ func (g *Game) Tick() {
 	newGrid := MakeGrid(g.x, g.y)
 	for y := 0; y < g.y; y++ {
 		for x := 0; x < g.x; x++ {
-			oldCellRule = g.rules.Array[g.grid.Array[y][x]]
+			oldCellRule = g.Rules.Array[g.Grid.Array[y][x]]
 			nextRuleIdx = oldCellRule.Transitions[oldAliveCount.Array[y][x]]
 			newGrid.Array[y][x] = nextRuleIdx
-			newCellRule = g.rules.Array[nextRuleIdx]
+			newCellRule = g.Rules.Array[nextRuleIdx]
 			cellAlive = newCellRule.Alive
 			if cellAlive != g.alives.array[y][x] {
 				g.updateAliveState(x, y, cellAlive)
 			}
 		}
 	}
-	copy(g.grid.Array, newGrid.Array)
+	copy(g.Grid.Array, newGrid.Array)
 }
 
 // TickFunction is called to Tick a Game
@@ -325,17 +326,33 @@ func RunMany(Options GameOpts, gameAmount int, TickFunction TickFunction) {
 	wg.Wait()
 }
 
-type gameSave struct {
+// GameSave used with the save function to write to a file
+type GameSave struct {
 	Rules []Rule    `json:"rules"`
 	Grid  [][]uint8 `json:"grid"`
 }
 
 // Save game of life to a file
-func (g *Game) Save(filename string) {
-	saveInfo := gameSave{g.rules.Array, g.grid.Array}
-	json, err := json.Marshal(saveInfo)
+func Save(G GameSave, Filename string) {
+	json, err := json.Marshal(G)
 	if err != nil {
 		panic(err)
 	}
-	ioutil.WriteFile(filename, json, 0644)
+	ioutil.WriteFile(Filename, json, 0644)
+}
+
+// Load a game from file
+func Load(Filename string) GameOpts {
+	data, err := ioutil.ReadFile(Filename)
+	if err != nil {
+		panic(err)
+	}
+	gs := GameSave{}
+	json.Unmarshal(data, &gs)
+	return GameOpts{
+		X:          0,
+		Y:          0,
+		Grid:       Grid{0, 0, gs.Grid},
+		RuleNumber: 0,
+		Rules:      Rules{gs.Rules}}
 }
