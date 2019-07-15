@@ -21,7 +21,8 @@ func randInt(i int) int {
 	return integer
 }
 
-// Grid to play on
+// Grid is a 2D grid of uint8s
+// Represents the game board and alive counts
 type Grid struct {
 	X, Y  int
 	Array [][]uint8
@@ -40,7 +41,7 @@ func (gr *Grid) Validate() {
 	}
 }
 
-// MakeGrid a 2D grid for play
+// MakeGrid creates a Grid with given dimensions
 func MakeGrid(x int, y int) Grid {
 	array := make([][]uint8, y)
 	for idx := range array {
@@ -63,7 +64,9 @@ func (gr *Grid) print() {
 	}
 }
 
-// Rule for Game of Life
+// Rule with alive status and transitions which
+// represent what the rule changes to based on
+// amount of adjacent alive cells (0-8)
 type Rule struct {
 	Alive       bool
 	Transitions [9]uint8
@@ -76,7 +79,7 @@ func (ru *Rule) randomize(RuleAmount int) {
 	}
 }
 
-// Rules for game of life
+// Rules is an ordered array of Rule structs
 type Rules struct {
 	Array []Rule
 }
@@ -101,7 +104,7 @@ func makeAlives(x int, y int) alives {
 	return alives{x, y, array}
 }
 
-// Game for fun
+// Game contains all game state required to progress a game of life
 type Game struct {
 	x, y       int
 	grid       Grid
@@ -110,7 +113,8 @@ type Game struct {
 	aliveCount Grid
 }
 
-// Validate a game
+// Validate that a game's contents are consistent
+// If this does not pass the game cannot Tick properly
 func (g *Game) Validate() {
 	// Check grid exists
 	if len(g.grid.Array) == 0 {
@@ -167,7 +171,7 @@ func (g *Game) init() {
 	}
 }
 
-// Tick progresses the game one frame
+// Tick progresses the game one step forward
 func (g *Game) Tick() {
 	var oldCellRule, newCellRule Rule
 	var nextRuleIdx uint8
@@ -194,7 +198,7 @@ func (g *Game) Tick() {
 	copy(g.grid.Array, newGrid.Array)
 }
 
-// Run a game of life
+// Run a Game
 func (g *Game) Run(count int, interactive bool) {
 	var response int
 	for i := 0; i <= count; i++ {
@@ -208,7 +212,8 @@ func (g *Game) Run(count int, interactive bool) {
 	}
 }
 
-// GameOpts of life Options
+// GameOpts represents all the options necessary to make
+// a valid game
 type GameOpts struct {
 	X, Y       int
 	Grid       Grid
@@ -216,7 +221,8 @@ type GameOpts struct {
 	Rules      Rules
 }
 
-// MakeGame is for fun
+// MakeGame constructs a game from a given set of options,
+// Which may be missing some options
 func MakeGame(options GameOpts) Game {
 
 	// Get/set rules amount if needed
@@ -288,6 +294,7 @@ func MakeGame(options GameOpts) Game {
 	alives := makeAlives(options.X, options.Y)
 	aliveCounts := MakeGrid(options.X, options.Y)
 
+	// Create the game object
 	currentGame := Game{
 		options.X,
 		options.Y,
@@ -296,13 +303,16 @@ func MakeGame(options GameOpts) Game {
 		alives,
 		aliveCounts}
 
+	// Ensure nothing mismatches
 	currentGame.Validate()
+
+	// Initialize the game
 	currentGame.init()
 
 	return currentGame
 }
 
-// RunMany games of life
+// RunMany games of life concurrently
 func RunMany(Options GameOpts, gameAmount int, tickAmount int) {
 	var wg sync.WaitGroup
 	wg.Add(gameAmount)
@@ -311,7 +321,7 @@ func RunMany(Options GameOpts, gameAmount int, tickAmount int) {
 			defer wg.Done()
 			g := MakeGame(Options)
 			g.Run(tickAmount, false)
-			// g.Save(fmt.Sprintf("./%s-%d.json", time.Now().Format(time.RFC3339), i))
+			g.Save(fmt.Sprintf("./%s-%d.json", time.Now().Format(time.RFC3339), i))
 			fmt.Println("Game ", i)
 		}(i)
 	}
@@ -324,7 +334,7 @@ type gameSave struct {
 	Grid  [][]uint8 `json:"grid"`
 }
 
-// Save game of life to file
+// Save game of life to a file
 func (g *Game) Save(filename string) {
 	saveInfo := gameSave{g.rules.Array, g.grid.Array}
 	json, err := json.Marshal(saveInfo)
