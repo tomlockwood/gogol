@@ -206,8 +206,7 @@ func (g *Game) Tick() {
 type TickFunction func(g Game, gameNumber int)
 
 // Run a Game
-func Run(Options GameOpts, TickFunction TickFunction, gameNumber int) {
-	g := MakeGame(Options)
+func Run(g Game, TickFunction TickFunction, gameNumber int) {
 	TickFunction(g, gameNumber)
 }
 
@@ -319,7 +318,8 @@ func RunMany(Options GameOpts, gameAmount int, TickFunction TickFunction) {
 	for i := 0; i < gameAmount; i++ {
 		go func(i int) {
 			defer wg.Done()
-			Run(Options, TickFunction, i)
+			g := MakeGame(Options)
+			Run(g, TickFunction, i)
 		}(i)
 	}
 	wg.Wait()

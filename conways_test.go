@@ -87,6 +87,12 @@ func TestConwaySquare(t *testing.T) {
 	}
 }
 
+func tick23(g Game, gameNumber int) {
+	for i := 0; i <= 23; i++ {
+		g.Tick()
+	}
+}
+
 func TestConwayGlider(t *testing.T) {
 	// Test for 1 Tick death
 	y0 := []uint8{0, 1, 0, 0, 0, 0, 0, 0, 0, 0}
@@ -102,8 +108,8 @@ func TestConwayGlider(t *testing.T) {
 	array := [][]uint8{y0, y1, y2, y3, y4, y5, y6, y7, y8, y9}
 	grid := Grid{10, 10, array}
 
-	game := MakeGame(GameOpts{10, 10, grid, 2, rs})
-	game.Run(23, false)
+	g := MakeGame(GameOpts{10, 10, grid, 2, rs})
+	Run(g, tick23, 0)
 
 	y0Out := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	y1Out := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
@@ -117,7 +123,7 @@ func TestConwayGlider(t *testing.T) {
 	y9Out := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	arrayOut := [][]uint8{y0Out, y1Out, y2Out, y3Out, y4Out, y5Out, y6Out, y7Out, y8Out, y9Out}
 
-	if mismatchCheck(arrayOut, game.grid.Array) {
+	if mismatchCheck(arrayOut, g.grid.Array) {
 		t.Fatalf("Slices do not match")
 	}
 }
