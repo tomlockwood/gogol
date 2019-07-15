@@ -50,7 +50,9 @@ func MakeGrid(x int, y int) Grid {
 	return Grid{x, y, array}
 }
 
-func (gr *Grid) randomize(RuleAmount int) {
+// Randomize a Grid based on the amount of Rules
+// it represents
+func (gr *Grid) Randomize(RuleAmount int) {
 	for idxy := range gr.Array {
 		for idxx := range gr.Array[idxy] {
 			gr.Array[idxy][idxx] = uint8(randInt(RuleAmount))
@@ -72,7 +74,8 @@ type Rule struct {
 	Transitions [9]uint8
 }
 
-func (ru *Rule) randomize(RuleAmount int) {
+// Randomize a single Rule
+func (ru *Rule) Randomize(RuleAmount int) {
 	ru.Alive = randInt(2) == 0
 	for idx := range ru.Transitions {
 		ru.Transitions[idx] = uint8(randInt(RuleAmount))
@@ -84,10 +87,11 @@ type Rules struct {
 	Array []Rule
 }
 
-func (rs *Rules) randomize(RuleAmount int) {
+// Randomize an array of Rules
+func (rs *Rules) Randomize(RuleAmount int) {
 	rs.Array = make([]Rule, RuleAmount)
 	for idx := range rs.Array {
-		rs.Array[idx].randomize(RuleAmount)
+		rs.Array[idx].Randomize(RuleAmount)
 	}
 }
 
@@ -230,7 +234,7 @@ func MakeGame(options GameOpts) Game {
 		if options.RuleNumber == 0 {
 			options.RuleNumber = randInt(4) + 2
 		}
-		options.Rules.randomize(options.RuleNumber)
+		options.Rules.Randomize(options.RuleNumber)
 	} else if options.RuleNumber == 0 {
 		options.RuleNumber = len(options.Rules.Array)
 	} else if options.RuleNumber != len(options.Rules.Array) {
@@ -280,7 +284,7 @@ func MakeGame(options GameOpts) Game {
 	// or validate the grid
 	if options.Grid.Array == nil {
 		gameGrid = MakeGrid(options.X, options.Y)
-		gameGrid.randomize(options.RuleNumber)
+		gameGrid.Randomize(options.RuleNumber)
 	} else {
 		options.Grid.X = options.X
 		options.Grid.Y = options.Y
