@@ -14,6 +14,13 @@ var randMutex sync.Mutex
 var src = rand.NewSource(time.Now().UnixNano())
 var r = rand.New(src)
 
+func randInt(i int) int {
+	randMutex.Lock()
+	integer := r.Intn(i)
+	randMutex.Unlock()
+	return integer
+}
+
 // Grid to play on
 type Grid struct {
 	X, Y  int
@@ -45,9 +52,7 @@ func MakeGrid(x int, y int) Grid {
 func (gr *Grid) randomize(RuleAmount int) {
 	for idxy := range gr.Array {
 		for idxx := range gr.Array[idxy] {
-			randMutex.Lock()
-			gr.Array[idxy][idxx] = uint8(r.Intn(RuleAmount))
-			randMutex.Unlock()
+			gr.Array[idxy][idxx] = uint8(randInt(RuleAmount))
 		}
 	}
 }
@@ -65,12 +70,10 @@ type Rule struct {
 }
 
 func (ru *Rule) randomize(RuleAmount int) {
-	randMutex.Lock()
-	ru.Alive = r.Intn(2) == 0
+	ru.Alive = randInt(2) == 0
 	for idx := range ru.Transitions {
-		ru.Transitions[idx] = uint8(r.Intn(RuleAmount))
+		ru.Transitions[idx] = uint8(randInt(RuleAmount))
 	}
-	randMutex.Unlock()
 }
 
 // Rules for game of life
@@ -219,9 +222,7 @@ func MakeGame(options GameOpts) Game {
 	// Get/set rules amount if needed
 	if options.Rules.Array == nil {
 		if options.RuleNumber == 0 {
-			randMutex.Lock()
-			options.RuleNumber = r.Intn(4) + 2
-			randMutex.Unlock()
+			options.RuleNumber = randInt(4) + 2
 		}
 		options.Rules.randomize(options.RuleNumber)
 	} else if options.RuleNumber == 0 {
