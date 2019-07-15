@@ -202,18 +202,13 @@ func (g *Game) Tick() {
 	copy(g.grid.Array, newGrid.Array)
 }
 
-// Run a Game
-func (g *Game) Run(count int, interactive bool) {
-	var response int
-	for i := 0; i <= count; i++ {
+// TickFunction is called to Tick a Game
+type TickFunction func(g Game, gameNumber int)
 
-		if interactive {
-			g.grid.print()
-			fmt.Scanf("%c", &response)
-			fmt.Println()
-		}
-		g.Tick()
-	}
+// Run a Game
+func Run(Options GameOpts, TickFunction TickFunction, gameNumber int) {
+	g := MakeGame(Options)
+	TickFunction(g, gameNumber)
 }
 
 // GameOpts represents all the options necessary to make
@@ -317,19 +312,16 @@ func MakeGame(options GameOpts) Game {
 }
 
 // RunMany games of life concurrently
-func RunMany(Options GameOpts, gameAmount int, tickAmount int) {
+// TODO - Get rid of tickAmount and add TickFunction
+func RunMany(Options GameOpts, gameAmount int, TickFunction TickFunction) {
 	var wg sync.WaitGroup
 	wg.Add(gameAmount)
 	for i := 0; i < gameAmount; i++ {
 		go func(i int) {
 			defer wg.Done()
-			g := MakeGame(Options)
-			g.Run(tickAmount, false)
-			g.Save(fmt.Sprintf("./%s-%d.json", time.Now().Format(time.RFC3339), i))
-			fmt.Println("Game ", i)
+			Run(Options, TickFunction, i)
 		}(i)
 	}
-
 	wg.Wait()
 }
 
