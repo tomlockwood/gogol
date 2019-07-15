@@ -65,6 +65,7 @@ func TestConwayDeath(t *testing.T) {
 	}
 }
 
+// TestConwaySquare - Checking still life
 func TestConwaySquare(t *testing.T) {
 	y0 := []uint8{0, 0, 0, 0}
 	y1 := []uint8{0, 1, 1, 0}
@@ -87,6 +88,7 @@ func TestConwaySquare(t *testing.T) {
 	}
 }
 
+// TestConwayGlider - Testing gliders work
 func TestConwayGlider(t *testing.T) {
 	// Test for 1 Tick death
 	y0 := []uint8{0, 1, 0, 0, 0, 0, 0, 0, 0, 0}
