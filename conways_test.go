@@ -125,3 +125,33 @@ func TestConwayGlider(t *testing.T) {
 		t.Fatalf("Slices do not match")
 	}
 }
+
+// TestLoad - Loading a file
+func TestLoad(t *testing.T) {
+	opts := Load("glider.json")
+	g := MakeGame(opts)
+
+	for idx, r := range g.Rules.Array {
+		if rs.Array[idx] != r {
+			fmt.Println(rs.Array[idx])
+			fmt.Println(r)
+			t.Fatalf("Rules do not match")
+		}
+	}
+
+	y0Out := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	y1Out := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	y2Out := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	y3Out := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	y4Out := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	y5Out := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	y6Out := []uint8{0, 0, 0, 0, 0, 0, 0, 1, 0, 0}
+	y7Out := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 1, 0}
+	y8Out := []uint8{0, 0, 0, 0, 0, 0, 1, 1, 1, 0}
+	y9Out := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	arrayOut := [][]uint8{y0Out, y1Out, y2Out, y3Out, y4Out, y5Out, y6Out, y7Out, y8Out, y9Out}
+
+	if mismatchCheck(arrayOut, g.Grid.Array) {
+		t.Fatalf("Slices do not match")
+	}
+}
