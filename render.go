@@ -93,7 +93,7 @@ func initGlfw() *glfw.Window {
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 
-	window, err := glfw.CreateWindow(width, height, "Conway's Game of Life", nil, nil)
+	window, err := glfw.CreateWindow(width, height, "AUTOMATA", nil, nil)
 	if err != nil {
 		panic(err)
 	}
