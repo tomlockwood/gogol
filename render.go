@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	width  = 500
-	height = 500
+	width  = 3840
+	height = 2160
 
 	vertexShaderSource = `
     #version 410
@@ -59,7 +59,7 @@ func Colour(r, g, b int) [3]float32 {
 
 // Render game of life
 func (g Game) Render() {
-	fps := 15
+	fps := 30
 
 	runtime.LockOSThread()
 
@@ -93,7 +93,7 @@ func initGlfw() *glfw.Window {
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 
-	window, err := glfw.CreateWindow(width, height, "AUTOMATA", nil, nil)
+	window, err := glfw.CreateWindow(width, height, "AUTOMATA", glfw.GetPrimaryMonitor(), nil)
 	if err != nil {
 		panic(err)
 	}
