@@ -312,7 +312,8 @@ func MakeGame(options GameOpts) Game {
 }
 
 // RunMany games of life concurrently
-// TODO - Get rid of tickAmount and add TickFunction
+// TickFunction is run on every tick of the game, so it
+// can be used to halt execution early or change the state
 func RunMany(Options GameOpts, gameAmount int, TickFunction TickFunction) {
 	var wg sync.WaitGroup
 	wg.Add(gameAmount)
