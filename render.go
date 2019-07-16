@@ -5,6 +5,7 @@ import (
 	"log"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -12,8 +13,8 @@ import (
 )
 
 const (
-	width  = 1000
-	height = 1000
+	width  = 500
+	height = 500
 
 	vertexShaderSource = `
     #version 410
@@ -44,8 +45,15 @@ var (
 	}
 )
 
+// Colour returns a OpenGL colour from rgb
+func Colour(r, g, b int) [3]float32 {
+	return [3]float32{float32(r / 255), float32(g / 255), float32(b / 255)}
+}
+
 // Render game of life
 func (g Game) Render() {
+	fps := 15
+
 	runtime.LockOSThread()
 
 	window := initGlfw()
@@ -59,7 +67,9 @@ func (g Game) Render() {
 		t := time.Now()
 		g.Tick()
 		draw(g, cells, window, program)
-		time.Sleep(time.Second/time.Duration(60) - time.Since(t))
+		deltat := time.Second / time.Duration(fps)
+		fmt.Println(time.Since(t))
+		time.Sleep(deltat - time.Since(t))
 	}
 }
 
@@ -112,13 +122,22 @@ func draw(g Game, cells [][]*cell, window *glfw.Window, program uint32) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.UseProgram(program)
 
+	var wg sync.WaitGroup
+
+	wg.Add(g.x * g.y)
+
 	for y := range cells {
 		for x, c := range cells[y] {
-			if g.alives.array[y][x] {
-				c.draw()
-			}
+			func(c cell) {
+				defer wg.Done()
+				if g.alives.array[y][x] {
+					c.draw()
+				}
+			}(*c)
 		}
 	}
+
+	wg.Wait()
 
 	glfw.PollEvents()
 	window.SwapBuffers()
