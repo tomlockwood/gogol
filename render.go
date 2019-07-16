@@ -45,6 +45,13 @@ var (
 	}
 )
 
+func onKey(w *glfw.Window, key glfw.Key, scancode int,
+	action glfw.Action, mods glfw.ModifierKey) {
+	if key == glfw.KeyEscape && action == glfw.Press {
+		w.SetShouldClose(true)
+	}
+}
+
 // Colour returns a OpenGL colour from rgb
 func Colour(r, g, b int) [3]float32 {
 	return [3]float32{float32(r / 255), float32(g / 255), float32(b / 255)}
@@ -57,6 +64,7 @@ func (g Game) Render() {
 	runtime.LockOSThread()
 
 	window := initGlfw()
+	window.SetKeyCallback(onKey)
 	defer glfw.Terminate()
 
 	program := initOpenGL()
