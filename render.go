@@ -141,9 +141,9 @@ func draw(g Game, cells [][]*cell, window *glfw.Window, program uint32) {
 				defer wg.Done()
 				switch r := g.Grid.Array[y][x]; r {
 				case 0:
-					gl.Uniform3f(0, 1, 1, 1)
+					gl.Uniform3f(0, 0, 1, 1)
 				case 1:
-					gl.Uniform3f(0, 1, 0, 1)
+					gl.Uniform3f(0, 0, 0, 1)
 				case 2:
 					gl.Uniform3f(0, 1, 0, 0)
 				case 3:
