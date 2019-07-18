@@ -18,17 +18,18 @@ const (
 
 	vertexShaderSource = `
     #version 410
-    in vec3 vp;
+		in vec3 vp;
     void main() {
-        gl_Position = vec4(vp, 1.0);
+				gl_Position = vec4(vp, 1.0);
     }
 ` + "\x00"
 
 	fragmentShaderSource = `
-    #version 410
+		#version 410
+		uniform vec3 v_color;
     out vec4 frag_colour;
     void main() {
-        frag_colour = vec4(1, 1, 1, 1);
+        frag_colour = vec4(v_color, 1.0);
     }
 ` + "\x00"
 )
@@ -138,9 +139,17 @@ func draw(g Game, cells [][]*cell, window *glfw.Window, program uint32) {
 		for x, c := range cells[y] {
 			func(c cell) {
 				defer wg.Done()
-				if g.alives.array[y][x] {
-					c.draw()
+				switch r := g.Grid.Array[y][x]; r {
+				case 0:
+					gl.Uniform3f(0, 1, 1, 1)
+				case 1:
+					gl.Uniform3f(0, 1, 0, 1)
+				case 2:
+					gl.Uniform3f(0, 1, 0, 0)
+				case 3:
+					gl.Uniform3f(0, 1, 1, 0)
 				}
+				c.draw()
 			}(*c)
 		}
 	}
