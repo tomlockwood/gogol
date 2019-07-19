@@ -1,4 +1,4 @@
-package gol
+package render
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
+	gol "github.com/tomlockwood/gogol"
 )
 
 const (
@@ -46,16 +47,23 @@ var (
 	}
 )
 
+var nextGame, saveGame, randomizeGame bool
+
 func onKey(w *glfw.Window, key glfw.Key, scancode int,
 	action glfw.Action, mods glfw.ModifierKey) {
 	if key == glfw.KeyEscape && action == glfw.Press {
 		w.SetShouldClose(true)
+	} else if key == glfw.KeySpace && action == glfw.Press {
+		nextGame = true
+	} else if key == glfw.KeyK && action == glfw.Press {
+		saveGame = true
+	} else if key == glfw.KeyR && action == glfw.Press {
+		randomizeGame = true
 	}
 }
 
 // Render game of life
-func (g Game) Render() {
-	fps := 24
+func Render(o gol.GameOpts, fps int) {
 
 	runtime.LockOSThread()
 
@@ -64,15 +72,26 @@ func (g Game) Render() {
 	defer glfw.Terminate()
 
 	program := initOpenGL()
-
+	g := gol.MakeGame(o)
 	cells := makeCells(g)
 
 	for !window.ShouldClose() {
 		t := time.Now()
+		if nextGame {
+			g = gol.MakeGame(o)
+			cells = makeCells(g)
+			nextGame = false
+		} else if saveGame {
+			gol.Save(
+				gol.GameSave{Rules: g.Rules.Array, Grid: g.Grid.Array},
+				fmt.Sprintf("./%s.json", time.Now().Format(time.RFC3339)))
+			saveGame = false
+		} else if randomizeGame {
+			g.Grid.Randomize(len(g.Rules.Array))
+		}
 		g.Tick()
 		draw(g, cells, window, program)
 		deltat := time.Second / time.Duration(fps)
-		fmt.Println(time.Since(t))
 		time.Sleep(deltat - time.Since(t))
 	}
 }
@@ -122,13 +141,13 @@ func initOpenGL() uint32 {
 	return prog
 }
 
-func draw(g Game, cells [][]*cell, window *glfw.Window, program uint32) {
+func draw(g gol.Game, cells [][]*cell, window *glfw.Window, program uint32) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.UseProgram(program)
 
 	var wg sync.WaitGroup
 
-	wg.Add(g.x * g.y)
+	wg.Add(g.X * g.Y)
 
 	for y := range cells {
 		for x, c := range cells[y] {
@@ -199,10 +218,10 @@ func (c *cell) draw() {
 	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
 }
 
-func makeCells(g Game) [][]*cell {
-	cells := make([][]*cell, g.y)
+func makeCells(g gol.Game) [][]*cell {
+	cells := make([][]*cell, g.Y)
 	for y := range cells {
-		cells[y] = make([]*cell, g.x)
+		cells[y] = make([]*cell, g.X)
 		for x := range cells[y] {
 			cells[y][x] = newCell(g, x, y)
 		}
@@ -210,7 +229,7 @@ func makeCells(g Game) [][]*cell {
 	return cells
 }
 
-func newCell(g Game, x, y int) *cell {
+func newCell(g gol.Game, x, y int) *cell {
 	points := make([]float32, len(square), len(square))
 	copy(points, square)
 
@@ -219,10 +238,10 @@ func newCell(g Game, x, y int) *cell {
 		var size float32
 		switch i % 3 {
 		case 0:
-			size = 1.0 / float32(g.x)
+			size = 1.0 / float32(g.X)
 			position = float32(x) * size
 		case 1:
-			size = 1.0 / float32(g.y)
+			size = 1.0 / float32(g.Y)
 			position = float32(y) * size
 		default:
 			continue

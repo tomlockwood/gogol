@@ -120,7 +120,7 @@ func makeAlives(x int, y int) alives {
 
 // Game contains all game state required to progress a game of life
 type Game struct {
-	x, y       int
+	X, Y       int
 	Grid       Grid
 	Rules      Rules
 	alives     alives
@@ -160,7 +160,7 @@ func (g *Game) updateAliveState(x int, y int, aliveState bool) {
 		for relX := -1; relX <= 1; relX++ {
 			absoluteY = relY + y
 			absoluteX = relX + x
-			if (relY == 0 && relX == 0) || absoluteY < 0 || absoluteX < 0 || absoluteY >= g.y || absoluteX >= g.x {
+			if (relY == 0 && relX == 0) || absoluteY < 0 || absoluteX < 0 || absoluteY >= g.Y || absoluteX >= g.X {
 				continue
 			}
 			if aliveState {
@@ -175,8 +175,8 @@ func (g *Game) updateAliveState(x int, y int, aliveState bool) {
 
 func (g *Game) init() {
 	var cellAlive bool
-	for y := 0; y < g.y; y++ {
-		for x := 0; x < g.x; x++ {
+	for y := 0; y < g.Y; y++ {
+		for x := 0; x < g.X; x++ {
 			cellAlive = g.Rules.Array[g.Grid.Array[y][x]].Alive
 			if cellAlive {
 				g.updateAliveState(x, y, cellAlive)
@@ -190,15 +190,15 @@ func (g *Game) Tick() {
 	var oldCellRule, newCellRule Rule
 	var nextRuleIdx uint8
 	var cellAlive bool
-	oldAliveCount := MakeGrid(g.x, g.y)
+	oldAliveCount := MakeGrid(g.X, g.Y)
 	for y := range g.aliveCount.Array {
 		for x := range g.aliveCount.Array[y] {
 			oldAliveCount.Array[y][x] = g.aliveCount.Array[y][x]
 		}
 	}
-	newGrid := MakeGrid(g.x, g.y)
-	for y := 0; y < g.y; y++ {
-		for x := 0; x < g.x; x++ {
+	newGrid := MakeGrid(g.X, g.Y)
+	for y := 0; y < g.Y; y++ {
+		for x := 0; x < g.X; x++ {
 			oldCellRule = g.Rules.Array[g.Grid.Array[y][x]]
 			nextRuleIdx = oldCellRule.Transitions[oldAliveCount.Array[y][x]]
 			newGrid.Array[y][x] = nextRuleIdx
