@@ -40,8 +40,8 @@ func mismatchCheck(expected [][]uint8, got [][]uint8) bool {
 
 // Standard conway's game of life ruleset
 
-var r0 = Rule{false, [9]uint8{0, 0, 0, 1, 0, 0, 0, 0, 0}}
-var r1 = Rule{true, [9]uint8{0, 0, 1, 1, 0, 0, 0, 0, 0}}
+var r0 = Rule{false, [9]uint8{0, 0, 0, 1, 0, 0, 0, 0, 0}, Colour{}}
+var r1 = Rule{true, [9]uint8{0, 0, 1, 1, 0, 0, 0, 0, 0}, Colour{}}
 var rs = Rules{[]Rule{r0, r1}}
 
 // TestConwayDeath - Checking one Tick death

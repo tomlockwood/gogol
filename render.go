@@ -53,14 +53,9 @@ func onKey(w *glfw.Window, key glfw.Key, scancode int,
 	}
 }
 
-// Colour returns a OpenGL colour from rgb
-func Colour(r, g, b int) [3]float32 {
-	return [3]float32{float32(r / 255), float32(g / 255), float32(b / 255)}
-}
-
 // Render game of life
 func (g Game) Render() {
-	fps := 30
+	fps := 24
 
 	runtime.LockOSThread()
 
@@ -139,16 +134,8 @@ func draw(g Game, cells [][]*cell, window *glfw.Window, program uint32) {
 		for x, c := range cells[y] {
 			func(c cell) {
 				defer wg.Done()
-				switch r := g.Grid.Array[y][x]; r {
-				case 0:
-					gl.Uniform3f(0, 0, 1, 1)
-				case 1:
-					gl.Uniform3f(0, 0, 0, 1)
-				case 2:
-					gl.Uniform3f(0, 1, 0, 0)
-				case 3:
-					gl.Uniform3f(0, 1, 1, 0)
-				}
+				color := g.Rules.Array[g.Grid.Array[y][x]].Colour
+				gl.Uniform3f(0, color.R, color.G, color.B)
 				c.draw()
 			}(*c)
 		}
