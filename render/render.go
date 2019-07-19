@@ -87,7 +87,8 @@ func Render(o gol.GameOpts, fps int) {
 				fmt.Sprintf("./%s.json", time.Now().Format(time.RFC3339)))
 			saveGame = false
 		} else if randomizeGame {
-			g.Grid.Randomize(len(g.Rules.Array))
+			g.Reset()
+			randomizeGame = false
 		}
 		g.Tick()
 		draw(g, cells, window, program)

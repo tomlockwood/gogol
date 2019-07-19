@@ -185,6 +185,15 @@ func (g *Game) init() {
 	}
 }
 
+// Reset the game to a random initial state
+// But with the same rules
+func (g *Game) Reset() {
+	g.Grid.Randomize(len(g.Rules.Array))
+	g.alives = makeAlives(g.X, g.Y)
+	g.aliveCount = MakeGrid(g.X, g.Y)
+	g.init()
+}
+
 // Tick progresses the game one step forward
 func (g *Game) Tick() {
 	var oldCellRule, newCellRule Rule
