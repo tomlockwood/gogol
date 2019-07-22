@@ -14,9 +14,6 @@ import (
 )
 
 const (
-	width  = 3840
-	height = 2160
-
 	vertexShaderSource = `
     #version 410
 		in vec3 vp;
@@ -63,11 +60,11 @@ func onKey(w *glfw.Window, key glfw.Key, scancode int,
 }
 
 // Render game of life
-func Render(o gol.GameOpts, fps int) {
+func Render(o gol.GameOpts, fps int, width int, height int) {
 
 	runtime.LockOSThread()
 
-	window := initGlfw()
+	window := initGlfw(width, height)
 	window.SetKeyCallback(onKey)
 	defer glfw.Terminate()
 
@@ -98,7 +95,7 @@ func Render(o gol.GameOpts, fps int) {
 }
 
 // initGlfw initializes glfw and returns a Window to use.
-func initGlfw() *glfw.Window {
+func initGlfw(width int, height int) *glfw.Window {
 	if err := glfw.Init(); err != nil {
 		panic(err)
 	}
