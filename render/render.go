@@ -44,12 +44,12 @@ var (
 	}
 )
 
-var nextGame, saveGame, randomizeGame bool
+var exitGame, nextGame, saveGame, randomizeGame bool
 
 func onKey(w *glfw.Window, key glfw.Key, scancode int,
 	action glfw.Action, mods glfw.ModifierKey) {
 	if key == glfw.KeyEscape && action == glfw.Press {
-		w.SetShouldClose(true)
+		exitGame = true
 	} else if key == glfw.KeySpace && action == glfw.Press {
 		nextGame = true
 	} else if key == glfw.KeyK && action == glfw.Press {
@@ -59,22 +59,29 @@ func onKey(w *glfw.Window, key glfw.Key, scancode int,
 	}
 }
 
-// Render game of life
-func Render(o gol.GameOpts, fps int, width int, height int) {
-
+// Init game of life
+func Init(width int, height int) (*glfw.Window, uint32) {
 	runtime.LockOSThread()
 
 	window := initGlfw(width, height)
 	window.SetKeyCallback(onKey)
-	defer glfw.Terminate()
 
 	program := initOpenGL()
+
+	return window, program
+}
+
+// Render game of life
+func Render(o gol.GameOpts, fps int, window *glfw.Window, program uint32) {
 	g := gol.MakeGame(o)
 	cells := makeCells(g)
 
 	for !window.ShouldClose() {
 		t := time.Now()
-		if nextGame {
+		if exitGame {
+			exitGame = false
+			return
+		} else if nextGame {
 			g = gol.MakeGame(o)
 			cells = makeCells(g)
 			nextGame = false
@@ -94,7 +101,12 @@ func Render(o gol.GameOpts, fps int, width int, height int) {
 	}
 }
 
-// initGlfw initializes glfw and returns a Window to use.
+// End rendering game of life
+func End() {
+	glfw.Terminate()
+}
+
+// initGlfw initializes glfw and returns a Window to use
 func initGlfw(width int, height int) *glfw.Window {
 	if err := glfw.Init(); err != nil {
 		panic(err)
