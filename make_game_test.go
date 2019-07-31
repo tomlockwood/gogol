@@ -23,4 +23,8 @@ func TestDefaultMakeGame(t *testing.T) {
 	if game.Y != 50 {
 		t.Fatalf("Y Coordinate not set to default of 50")
 	}
+
+	if len(game.Rules.Array) > 1 {
+		t.Fatalf("Too many rules")
+	}
 }
