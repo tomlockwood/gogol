@@ -229,9 +229,9 @@ func Run(g Game, TickFunction TickFunction, gameNumber int) {
 	TickFunction(g, gameNumber)
 }
 
-// Opts represents all the options necessary to make
+// Options represents all the options necessary to make
 // a valid game
-type Opts struct {
+type Options struct {
 	X, Y       int
 	Grid       Grid
 	RuleNumber int
@@ -240,7 +240,7 @@ type Opts struct {
 
 // MakeGame constructs a game from a given set of options,
 // Which may be missing some options
-func MakeGame(options Opts) Game {
+func MakeGame(options Options) Game {
 
 	// Get/set rules amount if needed
 	if options.Rules.Array == nil {
@@ -332,7 +332,7 @@ func MakeGame(options Opts) Game {
 // RunMany games of life concurrently
 // TickFunction is run on every tick of the game, so it
 // can be used to halt execution early or change the state
-func RunMany(Options Opts, gameAmount int, TickFunction TickFunction) {
+func RunMany(Options Options, gameAmount int, TickFunction TickFunction) {
 	var wg sync.WaitGroup
 	wg.Add(gameAmount)
 	for i := 0; i < gameAmount; i++ {
@@ -361,14 +361,14 @@ func Save(G GameSave, Filename string) {
 }
 
 // Load a game from file
-func Load(Filename string) Opts {
+func Load(Filename string) Options {
 	data, err := ioutil.ReadFile(Filename)
 	if err != nil {
 		panic(err)
 	}
 	gs := GameSave{}
 	json.Unmarshal(data, &gs)
-	return Opts{
+	return Options{
 		X:          0,
 		Y:          0,
 		Grid:       Grid{0, 0, gs.Grid},

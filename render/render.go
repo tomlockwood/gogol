@@ -71,7 +71,7 @@ func Init(width int, height int) (*glfw.Window, uint32) {
 }
 
 // Render game of life
-func Render(o gol.Opts, fps int, window *glfw.Window, program uint32) {
+func Render(o gol.Options, fps int, window *glfw.Window, program uint32) {
 	g := gol.MakeGame(o)
 	cells := makeCells(g)
 
