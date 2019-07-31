@@ -123,6 +123,8 @@ func initGlfw(width int, height int) *glfw.Window {
 	}
 	window.MakeContextCurrent()
 
+	glfw.SwapInterval(1)
+
 	return window
 }
 
