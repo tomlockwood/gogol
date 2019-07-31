@@ -13,7 +13,7 @@ var opts = Options{
 	0,
 	Rules{}}
 
-func TestDefaultLoad(t *testing.T) {
+func TestDefaultMakeGame(t *testing.T) {
 	game := MakeGame(opts)
 
 	if game.X != 50 {
