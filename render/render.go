@@ -86,7 +86,7 @@ func Render(o gol.Options, fps int, window *glfw.Window, program uint32) {
 			nextGame = false
 		} else if saveGame {
 			gol.Save(
-				gol.GameSave{Rules: g.Rules.Array, Grid: g.Grid.Array},
+				gol.SaveContent{Rules: g.Rules.Array, Grid: g.Grid.Array},
 				fmt.Sprintf("./%s.json", time.Now().Format(time.RFC3339)))
 			saveGame = false
 		} else if randomizeGame {
