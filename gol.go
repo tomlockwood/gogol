@@ -201,9 +201,7 @@ func (g *Game) Tick() {
 	var cellAlive bool
 	oldAliveCount := MakeGrid(g.X, g.Y)
 	for y := range g.aliveCount.Array {
-		for x := range g.aliveCount.Array[y] {
-			oldAliveCount.Array[y][x] = g.aliveCount.Array[y][x]
-		}
+		copy(oldAliveCount.Array[y], g.aliveCount.Array[y])
 	}
 	newGrid := MakeGrid(g.X, g.Y)
 	for y := 0; y < g.Y; y++ {
