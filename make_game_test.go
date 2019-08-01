@@ -13,8 +13,11 @@ var opts = Options{
 	0,
 	Rules{}}
 
+var copyOpts Options
+
 func TestDefaultLoad(t *testing.T) {
-	game := MakeGame(opts)
+	copyOpts = opts
+	game := MakeGame(copyOpts)
 
 	if game.X != 50 {
 		t.Fatalf("X Coordinate not set to default of 50")
@@ -30,8 +33,9 @@ func TestDefaultLoad(t *testing.T) {
 }
 
 func TestGridLoad(t *testing.T) {
-	opts.Grid = MakeGrid(4, 3)
-	game := MakeGame(opts)
+	copyOpts = opts
+	copyOpts.Grid = MakeGrid(4, 3)
+	game := MakeGame(copyOpts)
 
 	if game.X != 4 {
 		t.Fatalf("X Coordinate not set to 4")
@@ -43,9 +47,10 @@ func TestGridLoad(t *testing.T) {
 }
 
 func TestGridXYSet(t *testing.T) {
-	opts.Y = 3
-	opts.X = 4
-	game := MakeGame(opts)
+	copyOpts = opts
+	copyOpts.Y = 3
+	copyOpts.X = 4
+	game := MakeGame(copyOpts)
 
 	if len(game.Grid.Array[0]) != 4 {
 		t.Fatalf("X Coordinate not set to 4")
@@ -57,9 +62,10 @@ func TestGridXYSet(t *testing.T) {
 }
 
 func TestRulesLoad(t *testing.T) {
-	opts.Rules = Rules{}
-	opts.Rules.Randomize(3)
-	game := MakeGame(opts)
+	copyOpts = opts
+	copyOpts.Rules = Rules{}
+	copyOpts.Rules.Randomize(3)
+	game := MakeGame(copyOpts)
 
 	if len(game.Rules.Array) != 3 {
 		t.Fatalf("Three rules loaded and not retained")
@@ -67,8 +73,9 @@ func TestRulesLoad(t *testing.T) {
 }
 
 func TestRulenumberSet(t *testing.T) {
-	opts.RuleNumber = 3
-	game := MakeGame(opts)
+	copyOpts = opts
+	copyOpts.RuleNumber = 3
+	game := MakeGame(copyOpts)
 
 	if len(game.Rules.Array) != 3 {
 		t.Fatalf("Rulenumber 3 set and not created")
@@ -76,9 +83,10 @@ func TestRulenumberSet(t *testing.T) {
 }
 
 func TestGridvsXYMismatch(t *testing.T) {
-	opts.Grid = MakeGrid(4, 3)
-	opts.X = 10
-	opts.Y = 10
+	copyOpts = opts
+	copyOpts.Grid = MakeGrid(4, 3)
+	copyOpts.X = 10
+	copyOpts.Y = 10
 
 	defer func() {
 		if r := recover(); r == nil {
@@ -86,5 +94,20 @@ func TestGridvsXYMismatch(t *testing.T) {
 		}
 	}()
 
-	MakeGame(opts)
+	MakeGame(copyOpts)
+}
+
+func TestRulesvsRulenumberMismatch(t *testing.T) {
+	copyOpts = opts
+	copyOpts.Rules = Rules{}
+	copyOpts.Rules.Randomize(3)
+	copyOpts.RuleNumber = 10
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("A mismatch between rules size and rulenumber did not cause an error")
+		}
+	}()
+
+	MakeGame(copyOpts)
 }
