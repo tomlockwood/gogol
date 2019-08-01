@@ -111,3 +111,19 @@ func TestRulesvsRulenumberMismatch(t *testing.T) {
 
 	MakeGame(copyOpts)
 }
+
+func TestRulesvsGridContentMismatch(t *testing.T) {
+	copyOpts = opts
+	copyOpts.Rules = Rules{}
+	copyOpts.Rules.Randomize(3)
+	copyOpts.Grid = MakeGrid(3, 3)
+	copyOpts.Grid.Array[0][0] = 8
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("A mismatch between rules size and the grid content did not cause an error")
+		}
+	}()
+
+	MakeGame(copyOpts)
+}
