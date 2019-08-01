@@ -127,3 +127,32 @@ func TestRulesvsGridContentMismatch(t *testing.T) {
 
 	MakeGame(copyOpts)
 }
+
+func TestAlivesFromGrid(t *testing.T) {
+	copyOpts = opts
+	copyOpts.Rules = Rules{}
+	copyOpts.Rules.Randomize(2)
+	copyOpts.Rules.Array[0].Alive = false
+	copyOpts.Rules.Array[1].Alive = true
+	y0 := []uint8{0, 0, 0, 0, 0}
+	y1 := []uint8{0, 0, 1, 0, 0}
+	y2 := []uint8{0, 0, 1, 0, 0}
+	y3 := []uint8{0, 0, 1, 0, 0}
+	y4 := []uint8{0, 0, 0, 0, 0}
+	array := [][]uint8{y0, y1, y2, y3, y4}
+	copyOpts.Grid = Grid{5, 5, array}
+
+	game := MakeGame(copyOpts)
+
+	ey0 := []uint8{0, 1, 1, 1, 0}
+	ey1 := []uint8{0, 2, 1, 2, 0}
+	ey2 := []uint8{0, 3, 2, 3, 0}
+	ey3 := []uint8{0, 2, 1, 2, 0}
+	ey4 := []uint8{0, 1, 1, 1, 0}
+	eArray := [][]uint8{ey0, ey1, ey2, ey3, ey4}
+	alivesExpected := Grid{5, 5, eArray}
+
+	if mismatchCheck(alivesExpected.Array, game.aliveCount.Array) {
+		t.Fatalf("Generated field of alives not matching expected")
+	}
+}
