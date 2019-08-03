@@ -86,7 +86,7 @@ func Render(o gol.Options, fps int, window *glfw.Window, program uint32) {
 			nextGame = false
 		} else if saveGame {
 			gol.Save(
-				gol.SaveContent{Rules: g.Rules.Array, Grid: g.Grid.Array},
+				gol.SaveContent{Rules: g.Rules.Array, Grid: g.FrontGrid.Array},
 				fmt.Sprintf("./%s.json", time.Now().Format(time.RFC3339)))
 			saveGame = false
 		} else if randomizeGame {
@@ -162,7 +162,7 @@ func draw(g gol.Game, cells [][]*cell, window *glfw.Window, program uint32) {
 		for x, c := range cells[y] {
 			func(c cell) {
 				defer wg.Done()
-				color := g.Rules.Array[g.Grid.Array[y][x]].Colour
+				color := g.Rules.Array[g.FrontGrid.Array[y][x]].Colour
 				gl.Uniform3f(0, color.R, color.G, color.B)
 				c.draw()
 			}(*c)

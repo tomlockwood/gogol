@@ -31,7 +31,7 @@ func TestConwayDeath(t *testing.T) {
 	y2Out := []uint8{0, 0, 0}
 	arrayOut := [][]uint8{y0Out, y1Out, y2Out}
 
-	if mismatchCheck(arrayOut, game.Grid.Array) {
+	if mismatchCheck(arrayOut, game.FrontGrid.Array) {
 		t.Fatalf("Slices do not match")
 	}
 }
@@ -54,7 +54,7 @@ func TestConwaySquare(t *testing.T) {
 	y3Out := []uint8{0, 0, 0, 0}
 	arrayOut := [][]uint8{y0Out, y1Out, y2Out, y3Out}
 
-	if mismatchCheck(arrayOut, game.Grid.Array) {
+	if mismatchCheck(arrayOut, game.FrontGrid.Array) {
 		t.Fatalf("Slices do not match")
 	}
 }
@@ -92,7 +92,7 @@ func TestConwayGlider(t *testing.T) {
 	y9Out := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	arrayOut := [][]uint8{y0Out, y1Out, y2Out, y3Out, y4Out, y5Out, y6Out, y7Out, y8Out, y9Out}
 
-	if mismatchCheck(arrayOut, g.Grid.Array) {
+	if mismatchCheck(arrayOut, g.FrontGrid.Array) {
 		t.Fatalf("Slices do not match")
 	}
 }
@@ -122,7 +122,7 @@ func TestLoad(t *testing.T) {
 	y9Out := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	arrayOut := [][]uint8{y0Out, y1Out, y2Out, y3Out, y4Out, y5Out, y6Out, y7Out, y8Out, y9Out}
 
-	if mismatchCheck(arrayOut, g.Grid.Array) {
+	if mismatchCheck(arrayOut, g.FrontGrid.Array) {
 		t.Fatalf("Slices do not match")
 	}
 }

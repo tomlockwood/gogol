@@ -120,18 +120,20 @@ func makeAlives(x int, y int) alives {
 
 // Game contains all game state required to progress a game of life
 type Game struct {
-	X, Y       int
-	Grid       Grid
-	Rules      Rules
-	alives     alives
-	aliveCount Grid
+	X, Y                int
+	Grid                [2]Grid
+	Rules               Rules
+	alives              alives
+	aliveCount          Grid
+	ticks               int
+	FrontGrid, backGrid *Grid
 }
 
 // Validate that a game's contents are consistent
 // If this does not pass the game cannot Tick properly
 func (g *Game) Validate() {
 	// Check grid exists
-	if len(g.Grid.Array) == 0 {
+	if len(g.Grid[0].Array) == 0 {
 		panic("Grid not loaded")
 	}
 
@@ -145,9 +147,9 @@ func (g *Game) Validate() {
 	}
 
 	// Check grid has no cells outside rule number
-	for y := range g.Grid.Array {
-		for x := range g.Grid.Array[y] {
-			if g.Grid.Array[y][x] > ruleNumber {
+	for y := range g.Grid[0].Array {
+		for x := range g.Grid[0].Array[y] {
+			if g.Grid[0].Array[y][x] > ruleNumber {
 				panic(fmt.Sprintf("X: %d Y: %d not consistent with rule count", x, y))
 			}
 		}
@@ -174,10 +176,11 @@ func (g *Game) updateAliveState(x int, y int, aliveState bool) {
 }
 
 func (g *Game) init() {
+	g.ticks = 0
 	var cellAlive bool
 	for y := 0; y < g.Y; y++ {
 		for x := 0; x < g.X; x++ {
-			cellAlive = g.Rules.Array[g.Grid.Array[y][x]].Alive
+			cellAlive = g.Rules.Array[g.Grid[0].Array[y][x]].Alive
 			if cellAlive {
 				g.updateAliveState(x, y, cellAlive)
 			}
@@ -188,10 +191,21 @@ func (g *Game) init() {
 // Reset the game to a random initial state
 // But with the same rules
 func (g *Game) Reset() {
-	g.Grid.Randomize(len(g.Rules.Array))
+	g.ticks = 0
+	g.FrontGrid.Randomize(len(g.Rules.Array))
 	g.alives = makeAlives(g.X, g.Y)
 	g.aliveCount = MakeGrid(g.X, g.Y)
 	g.init()
+}
+
+func (g *Game) flipGrid() {
+	if (g.ticks % 2) == 0 {
+		g.FrontGrid = &g.Grid[0]
+		g.backGrid = &g.Grid[1]
+	} else {
+		g.FrontGrid = &g.Grid[1]
+		g.backGrid = &g.Grid[0]
+	}
 }
 
 // Tick progresses the game one step forward
@@ -203,12 +217,12 @@ func (g *Game) Tick() {
 	for y := range g.aliveCount.Array {
 		copy(oldAliveCount.Array[y], g.aliveCount.Array[y])
 	}
-	newGrid := MakeGrid(g.X, g.Y)
+
 	for y := 0; y < g.Y; y++ {
 		for x := 0; x < g.X; x++ {
-			oldCellRule = g.Rules.Array[g.Grid.Array[y][x]]
+			oldCellRule = g.Rules.Array[g.FrontGrid.Array[y][x]]
 			nextRuleIdx = oldCellRule.Transitions[oldAliveCount.Array[y][x]]
-			newGrid.Array[y][x] = nextRuleIdx
+			g.backGrid.Array[y][x] = nextRuleIdx
 			newCellRule = g.Rules.Array[nextRuleIdx]
 			cellAlive = newCellRule.Alive
 			if cellAlive != g.alives.array[y][x] {
@@ -216,7 +230,8 @@ func (g *Game) Tick() {
 			}
 		}
 	}
-	copy(g.Grid.Array, newGrid.Array)
+	g.ticks++
+	g.flipGrid()
 }
 
 // TickFunction is called to Tick a Game
@@ -308,15 +323,22 @@ func MakeGame(options Options) Game {
 	// Make alive bool and counts arrays
 	alives := makeAlives(options.X, options.Y)
 	aliveCounts := MakeGrid(options.X, options.Y)
+	backGrid := MakeGrid(options.X, options.Y)
 
+	var grid [2]Grid
+	grid[0] = options.Grid
+	grid[1] = backGrid
 	// Create the game object
 	currentGame := Game{
 		options.X,
 		options.Y,
-		options.Grid,
+		grid,
 		options.Rules,
 		alives,
-		aliveCounts}
+		aliveCounts,
+		0,
+		&grid[0],
+		&grid[1]}
 
 	// Ensure nothing mismatches
 	currentGame.Validate()
