@@ -416,7 +416,7 @@ func (h *History) Store(g Grid) {
 	}
 
 	if len(h.Grids) >= h.Capacity {
-		h.Grids = append([]Grid{CopyGrid(g)}, h.Grids[:h.Capacity]...)
+		h.Grids = append([]Grid{CopyGrid(g)}, h.Grids[:h.Capacity-1]...)
 	} else {
 		h.Grids = append([]Grid{CopyGrid(g)}, h.Grids...)
 	}
