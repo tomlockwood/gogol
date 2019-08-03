@@ -50,6 +50,16 @@ func MakeGrid(x int, y int) Grid {
 	return Grid{x, y, array}
 }
 
+// CopyGrid creates a copy of a Grid
+func CopyGrid(g Grid) Grid {
+	array := make([][]uint8, g.Y)
+	for idx := range array {
+		array[idx] = make([]uint8, g.X)
+		copy(array[idx], g.Array[idx])
+	}
+	return Grid{g.X, g.Y, array}
+}
+
 // Randomize a Grid based on the amount of Rules
 // it represents
 func (gr *Grid) Randomize(RuleAmount int) {
@@ -213,11 +223,7 @@ func (g *Game) Tick() {
 	var oldCellRule, newCellRule Rule
 	var nextRuleIdx uint8
 	var cellAlive bool
-	oldAliveCount := MakeGrid(g.X, g.Y)
-	for y := range g.aliveCount.Array {
-		copy(oldAliveCount.Array[y], g.aliveCount.Array[y])
-	}
-
+	oldAliveCount := CopyGrid(g.aliveCount)
 	for y := 0; y < g.Y; y++ {
 		for x := 0; x < g.X; x++ {
 			oldCellRule = g.Rules.Array[g.FrontGrid.Array[y][x]]
@@ -394,4 +400,29 @@ func Load(Filename string) Options {
 		Grid:       Grid{0, 0, gs.Grid},
 		RuleNumber: 0,
 		Rules:      Rules{gs.Rules}}
+}
+
+// History stores the history of a game and allows analysis
+type History struct {
+	Grids    []Grid
+	Seed     Grid
+	Capacity int
+}
+
+// Store history
+func (h *History) Store(g Grid) {
+	if h.Capacity == 0 {
+		return
+	}
+
+	if len(h.Grids) >= h.Capacity {
+		h.Grids = append([]Grid{CopyGrid(g)}, h.Grids[:h.Capacity]...)
+	} else {
+		h.Grids = append([]Grid{CopyGrid(g)}, h.Grids...)
+	}
+}
+
+// SetSeed of the game
+func (h *History) SetSeed(g Grid) {
+	h.Seed = CopyGrid(g)
 }
