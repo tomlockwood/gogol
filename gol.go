@@ -121,7 +121,7 @@ func makeAlives(x int, y int) alives {
 // Game contains all game state required to progress a game of life
 type Game struct {
 	X, Y                int
-	Grid                [2]Grid
+	Grids               [2]Grid
 	Rules               Rules
 	alives              alives
 	aliveCount          Grid
@@ -133,7 +133,7 @@ type Game struct {
 // If this does not pass the game cannot Tick properly
 func (g *Game) Validate() {
 	// Check grid exists
-	if len(g.Grid[0].Array) == 0 {
+	if len(g.Grids[0].Array) == 0 {
 		panic("Grid not loaded")
 	}
 
@@ -147,9 +147,9 @@ func (g *Game) Validate() {
 	}
 
 	// Check grid has no cells outside rule number
-	for y := range g.Grid[0].Array {
-		for x := range g.Grid[0].Array[y] {
-			if g.Grid[0].Array[y][x] > ruleNumber {
+	for y := range g.Grids[0].Array {
+		for x := range g.Grids[0].Array[y] {
+			if g.Grids[0].Array[y][x] > ruleNumber {
 				panic(fmt.Sprintf("X: %d Y: %d not consistent with rule count", x, y))
 			}
 		}
@@ -180,7 +180,7 @@ func (g *Game) init() {
 	var cellAlive bool
 	for y := 0; y < g.Y; y++ {
 		for x := 0; x < g.X; x++ {
-			cellAlive = g.Rules.Array[g.Grid[0].Array[y][x]].Alive
+			cellAlive = g.Rules.Array[g.Grids[0].Array[y][x]].Alive
 			if cellAlive {
 				g.updateAliveState(x, y, cellAlive)
 			}
@@ -200,11 +200,11 @@ func (g *Game) Reset() {
 
 func (g *Game) flipGrid() {
 	if (g.ticks % 2) == 0 {
-		g.FrontGrid = &g.Grid[0]
-		g.backGrid = &g.Grid[1]
+		g.FrontGrid = &g.Grids[0]
+		g.backGrid = &g.Grids[1]
 	} else {
-		g.FrontGrid = &g.Grid[1]
-		g.backGrid = &g.Grid[0]
+		g.FrontGrid = &g.Grids[1]
+		g.backGrid = &g.Grids[0]
 	}
 }
 
