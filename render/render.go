@@ -47,6 +47,9 @@ var exitGame, nextGame, saveGame, randomizeGame bool
 
 func onKey(w *glfw.Window, key glfw.Key, scancode int,
 	action glfw.Action, mods glfw.ModifierKey) {
+	// TODO - Perhaps make this alter some global state
+	// So the state can be arbitrarily be used by a Tick function
+	// Return a 'key' value and a 'reactedTo' bool
 	if key == glfw.KeyEscape && action == glfw.Press {
 		exitGame = true
 	} else if key == glfw.KeySpace && action == glfw.Press {
@@ -71,6 +74,10 @@ func Init(width int, height int) (*glfw.Window, uint32) {
 }
 
 // Render game of life
+// TODO - maybe you need to pass in the TickFunction here to allow access
+// To key state and changing rendering
+// And maybe a "Renderer" class is a good idea to handle INIT state
+// And the function etc.
 func Render(o gol.Options, fps int, window *glfw.Window, program uint32) {
 	g := gol.MakeGame(o)
 	cells := makeCells(g)
