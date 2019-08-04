@@ -11,7 +11,9 @@ func TestStorage(t *testing.T) {
 	history.Store(grid)
 	history.Store(grid)
 	history.Store(grid)
+	grid.Array[0][0] = 67
 	history.Store(grid)
+	grid.Array[0][0] = 68
 	history.Store(grid)
 	grid.Array[0][0] = 69
 	history.Store(grid)
@@ -24,7 +26,7 @@ func TestStorage(t *testing.T) {
 		t.Fatalf("Didn't store state properly in latest storage")
 	}
 
-	if history.Grids[1].Array[0][0] != 0 {
+	if history.Grids[1].Array[0][0] != 68 {
 		t.Fatalf("Didn't store state properly in older storage")
 	}
 }
