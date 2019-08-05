@@ -4,20 +4,19 @@ import "fmt"
 
 // Game contains all game state required to progress a game of life
 type Game struct {
-	X, Y                int
-	Grids               [2]Grid
-	Rules               Rules
-	alives              alives
-	aliveCount          Grid
-	ticks               int
-	FrontGrid, backGrid *Grid
+	X, Y       int
+	Field      GridBuffers
+	Rules      Rules
+	alives     alives
+	aliveCount Grid
+	ticks      int
 }
 
 // Validate that a game's contents are consistent
 // If this does not pass the game cannot Tick properly
 func (g *Game) Validate() {
 	// Check grid exists
-	if len(g.FrontGrid.Array) == 0 {
+	if len(g.Field.Front) == 0 {
 		panic("Grid not loaded")
 	}
 
@@ -31,9 +30,9 @@ func (g *Game) Validate() {
 	}
 
 	// Check grid has no cells outside rule number
-	for y := range g.FrontGrid.Array {
-		for x := range g.FrontGrid.Array[y] {
-			if g.FrontGrid.Array[y][x] > ruleNumber {
+	for y := range g.Field.Front {
+		for x := range g.Field.Front[y] {
+			if g.Field.Front[y][x] > ruleNumber {
 				panic(fmt.Sprintf("X: %d Y: %d not consistent with rule count", x, y))
 			}
 		}
@@ -64,7 +63,7 @@ func (g *Game) init() {
 	var cellAlive bool
 	for y := 0; y < g.Y; y++ {
 		for x := 0; x < g.X; x++ {
-			cellAlive = g.Rules.Array[g.FrontGrid.Array[y][x]].Alive
+			cellAlive = g.Rules.Array[g.Field.Front[y][x]].Alive
 			if cellAlive {
 				g.updateAliveState(x, y, cellAlive)
 			}
@@ -76,20 +75,10 @@ func (g *Game) init() {
 // But with the same rules
 func (g *Game) Reset() {
 	g.ticks = 0
-	g.FrontGrid.Randomize(len(g.Rules.Array))
+	g.Field.Randomize(len(g.Rules.Array))
 	g.alives = makeAlives(g.X, g.Y)
 	g.aliveCount = MakeGrid(g.X, g.Y)
 	g.init()
-}
-
-func (g *Game) flipGrid() {
-	if (g.ticks % 2) == 0 {
-		g.FrontGrid = &g.Grids[0]
-		g.backGrid = &g.Grids[1]
-	} else {
-		g.FrontGrid = &g.Grids[1]
-		g.backGrid = &g.Grids[0]
-	}
 }
 
 // Tick progresses the game one step forward
@@ -100,9 +89,9 @@ func (g *Game) Tick() {
 	oldAliveCount := CopyGrid(g.aliveCount)
 	for y := 0; y < g.Y; y++ {
 		for x := 0; x < g.X; x++ {
-			oldCellRule = g.Rules.Array[g.FrontGrid.Array[y][x]]
+			oldCellRule = g.Rules.Array[g.Field.Front[y][x]]
 			nextRuleIdx = oldCellRule.Transitions[oldAliveCount.Array[y][x]]
-			g.backGrid.Array[y][x] = nextRuleIdx
+			g.Field.back[y][x] = nextRuleIdx
 			newCellRule = g.Rules.Array[nextRuleIdx]
 			cellAlive = newCellRule.Alive
 			if cellAlive != g.alives.array[y][x] {
@@ -111,5 +100,5 @@ func (g *Game) Tick() {
 		}
 	}
 	g.ticks++
-	g.flipGrid()
+	g.Field.flip()
 }

@@ -52,11 +52,11 @@ func TestGridXYSet(t *testing.T) {
 	copyOpts.X = 4
 	game := MakeGame(copyOpts)
 
-	if len(game.FrontGrid.Array[0]) != 4 {
+	if len(game.Field.Front[0]) != 4 {
 		t.Fatalf("X Coordinate not set to 4")
 	}
 
-	if len(game.FrontGrid.Array) != 3 {
+	if len(game.Field.Front) != 3 {
 		t.Fatalf("Y Coordinate not set to 3")
 	}
 }

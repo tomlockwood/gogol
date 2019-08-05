@@ -1,6 +1,9 @@
 package gol
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 // Grid is a 2D grid of uint8s
 // Represents the game board and alive counts
@@ -69,4 +72,45 @@ func makeAlives(x int, y int) alives {
 		array[idx] = make([]bool, x)
 	}
 	return alives{x, y, array}
+}
+
+// GridBuffers are a set of Grids for flippin'
+type GridBuffers struct {
+	X, Y        int
+	Front, back [][]uint8
+	mutexes     [][]sync.Mutex
+}
+
+// MakeGridBuffers from x,y ranges
+func MakeGridBuffers(x int, y int, lockable bool) GridBuffers {
+	front := make([][]uint8, y)
+	back := make([][]uint8, y)
+	var mutexes [][]sync.Mutex
+	if lockable {
+		mutexes = make([][]sync.Mutex, y)
+	} else {
+		mutexes = [][]sync.Mutex{}
+	}
+	for idx := range front {
+		front[idx] = make([]uint8, x)
+		back[idx] = make([]uint8, x)
+		if lockable {
+			mutexes[idx] = make([]sync.Mutex, x)
+		}
+	}
+	return GridBuffers{x, y, front, back, mutexes}
+}
+
+func (grb *GridBuffers) flip() {
+	grb.back, grb.Front = grb.Front, grb.back
+}
+
+// Randomize a Grid based on the amount of Rules
+// it represents
+func (grb *GridBuffers) Randomize(RuleAmount int) {
+	for idxy := range grb.Front {
+		for idxx := range grb.Front[idxy] {
+			grb.Front[idxy][idxx] = uint8(randInt(RuleAmount))
+		}
+	}
 }

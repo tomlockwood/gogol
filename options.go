@@ -83,22 +83,18 @@ func MakeGame(options Options) Game {
 	// Make alive bool and counts arrays
 	alives := makeAlives(options.X, options.Y)
 	aliveCounts := MakeGrid(options.X, options.Y)
-	backGrid := MakeGrid(options.X, options.Y)
+	field := MakeGridBuffers(options.X, options.Y, false)
 
-	var grid [2]Grid
-	grid[0] = options.Grid
-	grid[1] = backGrid
+	field.Front = options.Grid.Array
 	// Create the game object
 	currentGame := Game{
 		options.X,
 		options.Y,
-		grid,
+		field,
 		options.Rules,
 		alives,
 		aliveCounts,
-		0,
-		&grid[0],
-		&grid[1]}
+		0}
 
 	// Ensure nothing mismatches
 	currentGame.Validate()
