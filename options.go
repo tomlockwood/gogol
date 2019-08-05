@@ -40,24 +40,20 @@ func MakeGame(options Options) Game {
 	// or by the x, y set by the grid
 	// or by the game options struct
 	if options.X == 0 {
-		if options.Grid == nil {
+		if len(options.Grid) == 0 {
 			setX = 50
-		} else if options.X == 0 {
-			setX = len(options.Grid[0])
 		} else {
-			setX = options.X
+			setX = len(options.Grid[0])
 		}
 	} else {
 		setX = options.X
 	}
 
 	if options.Y == 0 {
-		if options.Grid == nil {
+		if len(options.Grid) == 0 {
 			setY = 50
-		} else if options.Y == 0 {
-			setY = len(options.Grid)
 		} else {
-			setY = options.Y
+			setY = len(options.Grid)
 		}
 	} else {
 		setY = options.Y
@@ -68,7 +64,7 @@ func MakeGame(options Options) Game {
 
 	// Create the grid if it doesn't exist
 	// or validate the grid
-	if options.Grid == nil {
+	if len(options.Grid) == 0 {
 		field = MakeGridBuffers(options.X, options.Y, false)
 		field.Randomize(options.RuleNumber)
 	} else {

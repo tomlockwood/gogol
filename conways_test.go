@@ -74,7 +74,6 @@ func TestConwayGlider(t *testing.T) {
 
 	g := MakeGame(Options{10, 10, array, 2, rs})
 	for i := 0; i <= 23; i++ {
-		fmt.Println("tick")
 		g.Tick()
 	}
 
