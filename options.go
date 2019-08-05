@@ -6,7 +6,7 @@ import "fmt"
 // a valid game
 type Options struct {
 	X, Y       int
-	Grid       Grid
+	Grid       [][]uint8
 	RuleNumber int
 	Rules      Rules
 }
@@ -33,31 +33,31 @@ func MakeGame(options Options) Game {
 	}
 
 	var setX, setY int
-	var gameGrid Grid
+	var field GridBuffers
 
 	// Make the proposed game x, y 50 by default
 	// or based on the length of the grid slices
 	// or by the x, y set by the grid
 	// or by the game options struct
 	if options.X == 0 {
-		if options.Grid.Array == nil {
+		if options.Grid == nil {
 			setX = 50
-		} else if options.Grid.X == 0 {
-			setX = len(options.Grid.Array[0])
+		} else if options.X == 0 {
+			setX = len(options.Grid[0])
 		} else {
-			setX = options.Grid.X
+			setX = options.X
 		}
 	} else {
 		setX = options.X
 	}
 
 	if options.Y == 0 {
-		if options.Grid.Array == nil {
+		if options.Grid == nil {
 			setY = 50
-		} else if options.Grid.Y == 0 {
-			setY = len(options.Grid.Array)
+		} else if options.Y == 0 {
+			setY = len(options.Grid)
 		} else {
-			setY = options.Grid.Y
+			setY = options.Y
 		}
 	} else {
 		setY = options.Y
@@ -68,24 +68,19 @@ func MakeGame(options Options) Game {
 
 	// Create the grid if it doesn't exist
 	// or validate the grid
-	if options.Grid.Array == nil {
-		gameGrid = MakeGrid(options.X, options.Y)
-		gameGrid.Randomize(options.RuleNumber)
+	if options.Grid == nil {
+		field = MakeGridBuffers(options.X, options.Y, false)
+		field.Randomize(options.RuleNumber)
 	} else {
-		options.Grid.X = options.X
-		options.Grid.Y = options.Y
-		options.Grid.Validate()
-		gameGrid = options.Grid
+		field = MakeGridBuffers(options.X, options.Y, false)
+		field.Front = options.Grid
+		field.Validate()
 	}
-
-	options.Grid = gameGrid
 
 	// Make alive bool and counts arrays
 	alives := makeAlives(options.X, options.Y)
-	aliveCounts := MakeGrid(options.X, options.Y)
-	field := MakeGridBuffers(options.X, options.Y, false)
+	aliveCounts := MakeGridBuffers(options.X, options.Y, true)
 
-	field.Front = options.Grid.Array
 	// Create the game object
 	currentGame := Game{
 		options.X,

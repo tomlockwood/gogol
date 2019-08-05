@@ -9,7 +9,7 @@ import "testing"
 var opts = Options{
 	0,
 	0,
-	Grid{},
+	[][]uint8{},
 	0,
 	Rules{}}
 
@@ -117,7 +117,7 @@ func TestRulesvsGridContentMismatch(t *testing.T) {
 	copyOpts.Rules = Rules{}
 	copyOpts.Rules.Randomize(3)
 	copyOpts.Grid = MakeGrid(3, 3)
-	copyOpts.Grid.Array[0][0] = 8
+	copyOpts.Grid[0][0] = 8
 
 	defer func() {
 		if r := recover(); r == nil {
@@ -139,8 +139,7 @@ func TestAlivesFromGrid(t *testing.T) {
 	y2 := []uint8{0, 0, 1, 0, 0}
 	y3 := []uint8{0, 0, 1, 0, 0}
 	y4 := []uint8{0, 0, 0, 0, 0}
-	array := [][]uint8{y0, y1, y2, y3, y4}
-	copyOpts.Grid = Grid{5, 5, array}
+	copyOpts.Grid = [][]uint8{y0, y1, y2, y3, y4}
 
 	game := MakeGame(copyOpts)
 
@@ -150,9 +149,8 @@ func TestAlivesFromGrid(t *testing.T) {
 	ey3 := []uint8{0, 2, 1, 2, 0}
 	ey4 := []uint8{0, 1, 1, 1, 0}
 	eArray := [][]uint8{ey0, ey1, ey2, ey3, ey4}
-	alivesExpected := Grid{5, 5, eArray}
 
-	if mismatchCheck(alivesExpected.Array, game.aliveCount.Array) {
+	if mismatchCheck(eArray, game.aliveCount.Front) {
 		t.Fatalf("Generated field of alives not matching expected")
 	}
 }

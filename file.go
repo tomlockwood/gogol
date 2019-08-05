@@ -31,7 +31,7 @@ func Load(Filename string) Options {
 	return Options{
 		X:          0,
 		Y:          0,
-		Grid:       Grid{0, 0, gs.Grid},
+		Grid:       gs.Grid,
 		RuleNumber: 0,
 		Rules:      Rules{gs.Rules}}
 }

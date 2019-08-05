@@ -8,7 +8,7 @@ type Game struct {
 	Field      GridBuffers
 	Rules      Rules
 	alives     alives
-	aliveCount Grid
+	aliveCount GridBuffers
 	ticks      int
 }
 
@@ -49,9 +49,9 @@ func (g *Game) updateAliveState(x int, y int, aliveState bool) {
 				continue
 			}
 			if aliveState {
-				g.aliveCount.Array[absoluteY][absoluteX]++
+				g.aliveCount.back[absoluteY][absoluteX]++
 			} else {
-				g.aliveCount.Array[absoluteY][absoluteX]--
+				g.aliveCount.back[absoluteY][absoluteX]--
 			}
 		}
 	}
@@ -69,6 +69,7 @@ func (g *Game) init() {
 			}
 		}
 	}
+	g.aliveCount.flip()
 }
 
 // Reset the game to a random initial state
@@ -77,7 +78,7 @@ func (g *Game) Reset() {
 	g.ticks = 0
 	g.Field.Randomize(len(g.Rules.Array))
 	g.alives = makeAlives(g.X, g.Y)
-	g.aliveCount = MakeGrid(g.X, g.Y)
+	g.aliveCount = MakeGridBuffers(g.X, g.Y, true)
 	g.init()
 }
 
@@ -86,11 +87,11 @@ func (g *Game) Tick() {
 	var oldCellRule, newCellRule Rule
 	var nextRuleIdx uint8
 	var cellAlive bool
-	oldAliveCount := CopyGrid(g.aliveCount)
+	g.aliveCount.CopyFrontToBack()
 	for y := 0; y < g.Y; y++ {
 		for x := 0; x < g.X; x++ {
 			oldCellRule = g.Rules.Array[g.Field.Front[y][x]]
-			nextRuleIdx = oldCellRule.Transitions[oldAliveCount.Array[y][x]]
+			nextRuleIdx = oldCellRule.Transitions[g.aliveCount.Front[y][x]]
 			g.Field.back[y][x] = nextRuleIdx
 			newCellRule = g.Rules.Array[nextRuleIdx]
 			cellAlive = newCellRule.Alive
@@ -101,4 +102,5 @@ func (g *Game) Tick() {
 	}
 	g.ticks++
 	g.Field.flip()
+	g.aliveCount.flip()
 }

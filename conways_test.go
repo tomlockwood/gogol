@@ -21,9 +21,8 @@ func TestConwayDeath(t *testing.T) {
 	y1 := []uint8{0, 1, 0}
 	y2 := []uint8{0, 1, 0}
 	array := [][]uint8{y0, y1, y2}
-	grid := Grid{3, 3, array}
 
-	game := MakeGame(Options{3, 3, grid, 2, rs})
+	game := MakeGame(Options{3, 3, array, 2, rs})
 	game.Tick()
 
 	y0Out := []uint8{0, 0, 0}
@@ -43,9 +42,8 @@ func TestConwaySquare(t *testing.T) {
 	y2 := []uint8{0, 1, 1, 0}
 	y3 := []uint8{0, 0, 0, 0}
 	array := [][]uint8{y0, y1, y2, y3}
-	grid := Grid{4, 4, array}
 
-	game := MakeGame(Options{4, 4, grid, 2, rs})
+	game := MakeGame(Options{4, 4, array, 2, rs})
 	game.Tick()
 
 	y0Out := []uint8{0, 0, 0, 0}
@@ -73,10 +71,10 @@ func TestConwayGlider(t *testing.T) {
 	y8 := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	y9 := []uint8{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	array := [][]uint8{y0, y1, y2, y3, y4, y5, y6, y7, y8, y9}
-	grid := Grid{10, 10, array}
 
-	g := MakeGame(Options{10, 10, grid, 2, rs})
+	g := MakeGame(Options{10, 10, array, 2, rs})
 	for i := 0; i <= 23; i++ {
+		fmt.Println("tick")
 		g.Tick()
 	}
 

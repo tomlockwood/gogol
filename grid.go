@@ -5,60 +5,13 @@ import (
 	"sync"
 )
 
-// Grid is a 2D grid of uint8s
-// Represents the game board and alive counts
-type Grid struct {
-	X, Y  int
-	Array [][]uint8
-}
-
-// Validate a Grid
-func (gr *Grid) Validate() {
-	if len(gr.Array) != gr.Y {
-		panic(fmt.Sprintf("Grid array length %d does not equal grid y %d", len(gr.Array), gr.Y))
-	}
-
-	for idx := range gr.Array {
-		if len(gr.Array[idx]) != gr.X {
-			panic(fmt.Sprintf("Grid array length at line %d, %d does not equal grid x: %d", idx, len(gr.Array[idx]), gr.X))
-		}
-	}
-}
-
 // MakeGrid creates a Grid with given dimensions
-func MakeGrid(x int, y int) Grid {
+func MakeGrid(x int, y int) [][]uint8 {
 	array := make([][]uint8, y)
 	for idx := range array {
 		array[idx] = make([]uint8, x)
 	}
-	return Grid{x, y, array}
-}
-
-// CopyGrid creates a copy of a Grid
-func CopyGrid(g Grid) Grid {
-	array := make([][]uint8, g.Y)
-	for idx := range array {
-		array[idx] = make([]uint8, g.X)
-		copy(array[idx], g.Array[idx])
-	}
-	return Grid{g.X, g.Y, array}
-}
-
-// Randomize a Grid based on the amount of Rules
-// it represents
-func (gr *Grid) Randomize(RuleAmount int) {
-	for idxy := range gr.Array {
-		for idxx := range gr.Array[idxy] {
-			gr.Array[idxy][idxx] = uint8(randInt(RuleAmount))
-		}
-	}
-}
-
-// Print grid contents
-func (gr *Grid) Print() {
-	for idx := range gr.Array {
-		fmt.Println(gr.Array[idx])
-	}
+	return array
 }
 
 type alives struct {
@@ -113,4 +66,54 @@ func (grb *GridBuffers) Randomize(RuleAmount int) {
 			grb.Front[idxy][idxx] = uint8(randInt(RuleAmount))
 		}
 	}
+}
+
+// CheckGrid is up to spec
+func CheckGrid(grid [][]uint8, x int, y int) {
+	if len(grid) != y {
+		panic(fmt.Sprintf("Grid array length %d does not equal grid y %d", len(grid), y))
+	}
+
+	for idx := range grid {
+		if len(grid[idx]) != x {
+			panic(fmt.Sprintf("Grid array length at line %d, %d does not equal grid x: %d", idx, len(grid), x))
+		}
+	}
+}
+
+// CheckBoolGrid is up to spec
+func CheckBoolGrid(grid [][]sync.Mutex, x int, y int) {
+	if len(grid) != y {
+		panic(fmt.Sprintf("Grid array length %d does not equal grid y %d", len(grid), y))
+	}
+
+	for idx := range grid {
+		if len(grid[idx]) != x {
+			panic(fmt.Sprintf("Grid array length at line %d, %d does not equal grid x: %d", idx, len(grid), x))
+		}
+	}
+}
+
+// Validate all grids in GridBuffers
+func (grb *GridBuffers) Validate() {
+	CheckGrid(grb.Front, grb.X, grb.Y)
+	CheckGrid(grb.back, grb.X, grb.Y)
+	if len(grb.mutexes) != 0 {
+		CheckBoolGrid(grb.mutexes, grb.X, grb.Y)
+	}
+}
+
+// CopyFrontToBack copies the front GridBuffer to the back one
+func (grb *GridBuffers) CopyFrontToBack() {
+	for idx := range grb.back {
+		copy(grb.back[idx], grb.Front[idx])
+	}
+}
+
+// Print the GridBuffers Arrays
+func (grb *GridBuffers) Print() {
+	fmt.Println("Front Field")
+	printArray(grb.Front)
+	fmt.Println("Back Field")
+	printArray(grb.back)
 }

@@ -18,7 +18,7 @@ func BenchmarkConways(b *testing.B) {
 	var conwayOpts = Options{
 		0,
 		0,
-		Grid{},
+		[][]uint8{},
 		2,
 		rs}
 
