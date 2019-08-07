@@ -161,10 +161,6 @@ func Make(width int, height int, fps int) Renderer {
 }
 
 // Render game of life
-// TODO - maybe you need to pass in the TickFunction here to allow access
-// To key state and changing rendering
-// And maybe a "Renderer" class is a good idea to handle INIT state
-// And the function etc.
 func (r *Renderer) Render() {
 	SetActionFunction(ActionDefault)
 	r.RenderAction()
@@ -187,11 +183,6 @@ func (r *Renderer) RenderAction() {
 		deltat := time.Second / time.Duration(r.fps)
 		time.Sleep(deltat - time.Since(t))
 	}
-}
-
-// End rendering game of life
-func End() {
-	glfw.Terminate()
 }
 
 // initGlfw initializes glfw and returns a Window to use
