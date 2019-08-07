@@ -43,26 +43,108 @@ var (
 	}
 )
 
-var exitGame, nextGame, saveGame, randomizeGame bool
+// ActionFunction that's run on every tick
+var ActionFunction Action
+var actionKey glfw.Key
+var reacted, closeScreen bool
+var cells [][]*cell
+var game *gol.Game
+
+// options passed in to the renderer
+var options *gol.Options
+
+//// EXTERNALLY ACCESSIBLE options
+
+// Reacted represents if any action has occurred that hasn't been responded to
+func Reacted() bool {
+	return reacted
+}
+
+// Acted lets you indicate you have reacted to a KeyPress
+func Acted() {
+	reacted = true
+}
+
+// ActionKey is the key currently pressed
+func ActionKey() glfw.Key {
+	return actionKey
+}
+
+// SetActionFunction for renderer
+func SetActionFunction(a Action) {
+	ActionFunction = a
+}
+
+// CloseScreen closes the screen
+func CloseScreen() {
+	closeScreen = true
+}
+
+// InitGame allows new game creation from an options object
+func InitGame(o gol.Options) {
+	options = &o
+	g := gol.MakeGame(*options)
+	game = &g
+	cells = makeCells(*game)
+}
+
+// GetGame returns the current game
+func GetGame() gol.Game {
+	return *game
+}
+
+// SetGame sets the current game
+func SetGame(g gol.Game) {
+	game = &g
+	cells = makeCells(*game)
+}
+
+//// INTERNAL OBJECTS
 
 func onKey(w *glfw.Window, key glfw.Key, scancode int,
 	action glfw.Action, mods glfw.ModifierKey) {
-	// TODO - Perhaps make this alter some global state
-	// So the state can be arbitrarily be used by a Tick function
-	// Return a 'key' value and a 'reactedTo' bool
-	if key == glfw.KeyEscape && action == glfw.Press {
-		exitGame = true
-	} else if key == glfw.KeySpace && action == glfw.Press {
-		nextGame = true
-	} else if key == glfw.KeyK && action == glfw.Press {
-		saveGame = true
-	} else if key == glfw.KeyR && action == glfw.Press {
-		randomizeGame = true
+	if action == glfw.Press {
+		actionKey = key
+		reacted = false
 	}
 }
 
-// Init game of life
-func Init(width int, height int) (*glfw.Window, uint32) {
+// Renderer is the rendering object
+type Renderer struct {
+	width, height, fps int
+	window             *glfw.Window
+	program            uint32
+}
+
+// Action is called on every Tick of a Game
+type Action func()
+
+// ActionDefault is how the game behaves by default
+func ActionDefault() {
+	if reacted {
+	} else if actionKey == glfw.KeyEscape {
+		closeScreen = true
+		reacted = true
+	} else if actionKey == glfw.KeySpace {
+		g := gol.MakeGame(*options)
+		game = &g
+		cells = makeCells(*game)
+		reacted = true
+	} else if actionKey == glfw.KeyK {
+		gol.Save(
+			gol.SaveContent{Rules: game.Rules.Array, Grid: game.Field.Front},
+			fmt.Sprintf("./%s.json", time.Now().Format(time.RFC3339)))
+		reacted = true
+	} else if actionKey == glfw.KeyR {
+		game.Reset()
+		reacted = true
+	} else {
+		reacted = true
+	}
+}
+
+// Make a valid renderer
+func Make(width int, height int, fps int) Renderer {
 	runtime.LockOSThread()
 
 	window := initGlfw(width, height)
@@ -70,7 +152,12 @@ func Init(width int, height int) (*glfw.Window, uint32) {
 
 	program := initOpenGL()
 
-	return window, program
+	return Renderer{
+		width,
+		height,
+		fps,
+		window,
+		program}
 }
 
 // Render game of life
@@ -78,31 +165,26 @@ func Init(width int, height int) (*glfw.Window, uint32) {
 // To key state and changing rendering
 // And maybe a "Renderer" class is a good idea to handle INIT state
 // And the function etc.
-func Render(o gol.Options, fps int, window *glfw.Window, program uint32) {
-	g := gol.MakeGame(o)
-	cells := makeCells(g)
+func (r *Renderer) Render() {
+	SetActionFunction(ActionDefault)
+	r.RenderAction()
+}
 
-	for !window.ShouldClose() {
+// RenderAction renders a game with a passed-in actionFunction
+func (r *Renderer) RenderAction() {
+	g := gol.MakeGame(*options)
+	game = &g
+	cells = makeCells(*game)
+
+	for !r.window.ShouldClose() {
 		t := time.Now()
-		if exitGame {
-			exitGame = false
+		ActionFunction()
+		if closeScreen {
 			return
-		} else if nextGame {
-			g = gol.MakeGame(o)
-			cells = makeCells(g)
-			nextGame = false
-		} else if saveGame {
-			gol.Save(
-				gol.SaveContent{Rules: g.Rules.Array, Grid: g.Field.Front},
-				fmt.Sprintf("./%s.json", time.Now().Format(time.RFC3339)))
-			saveGame = false
-		} else if randomizeGame {
-			g.Reset()
-			randomizeGame = false
 		}
-		g.Tick()
-		draw(g, cells, window, program)
-		deltat := time.Second / time.Duration(fps)
+		game.Tick()
+		draw(*game, cells, r.window, r.program)
+		deltat := time.Second / time.Duration(r.fps)
 		time.Sleep(deltat - time.Since(t))
 	}
 }
