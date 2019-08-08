@@ -202,6 +202,7 @@ func initGlfw(width int, height int) *glfw.Window {
 		panic(err)
 	}
 	window.MakeContextCurrent()
+	window.SetInputMode(glfw.CursorMode, glfw.CursorHidden)
 
 	glfw.SwapInterval(1)
 
