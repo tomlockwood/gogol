@@ -86,6 +86,7 @@ func InitGame(o gol.Options) {
 	g := gol.MakeGame(*options)
 	game = &g
 	cells = makeCells(*game)
+	Acted()
 }
 
 // GetGame returns the current game
@@ -162,7 +163,6 @@ func Make(width int, height int, fps int) Renderer {
 
 // Render game of life
 func (r *Renderer) Render() {
-	SetActionFunction(ActionDefault)
 	r.RenderAction()
 }
 
@@ -176,6 +176,7 @@ func (r *Renderer) RenderAction() {
 		t := time.Now()
 		ActionFunction()
 		if closeScreen {
+			closeScreen = false
 			return
 		}
 		game.Tick()
